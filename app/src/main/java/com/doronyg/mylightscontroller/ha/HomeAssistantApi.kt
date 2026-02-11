@@ -1,9 +1,16 @@
 package com.doronyg.mylightscontroller.ha
+import com.doronyg.mylightscontroller.Config
+import com.doronyg.mylightscontroller.utils.NetworkUtils
+import com.doronyg.mylightscontroller.utils.NetworkUtils.HttpMethod
 import com.doronyg.mylightscontroller.utils.Utils
+import com.doronyg.mylightscontroller.utils.Utils.APPLICATION_JSON
+import com.doronyg.mylightscontroller.utils.Utils.contentType
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.IOException
 import java.lang.ref.WeakReference
@@ -51,9 +58,9 @@ object HomeAssistantApi {
             return
         }
 
-        val request = Utils.buildHaRequest("states")
+        val request = buildHaRequest("states")
 
-        Utils.okHttpClient.newCall(request).enqueue(object : Callback {
+        NetworkUtils.okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 Utils.log("HomeAssistantApi Failed to fetch states $e")
                 onResult(emptyList())
@@ -120,13 +127,13 @@ object HomeAssistantApi {
 
     // Generic POST helper
     private fun postCommand(endpoint: String, command: HaLightCommand) {
-        val request = Utils.buildHaRequest(
+        val request = buildHaRequest(
             endpoint = "services/$endpoint",
             method = "POST",
             bodyJson = gson.toJson(command)
         )
 
-        Utils.okHttpClient.newCall(request).enqueue(object : Callback {
+        NetworkUtils.okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 Utils.log("HomeAssistantApi Failed to POST $endpoint $e")
             }
@@ -137,5 +144,24 @@ object HomeAssistantApi {
                 response.close()
             }
         })
+    }
+
+    // Helper to build a request with HA headers
+    fun buildHaRequest(
+        endpoint: String,
+        method: String = HttpMethod.GET,
+        bodyJson: String? = null
+    ): Request {
+        val builder = Request.Builder()
+            .url("${Config.HOME_ASSISTANT_URL}/api/$endpoint")
+            .addHeader("Authorization", "Bearer ${Config.HOME_ASSISTANT_TOKEN}")
+            .addHeader("Content-Type", APPLICATION_JSON)
+
+        if (method.uppercase() == HttpMethod.POST && bodyJson != null) {
+            val requestBody = bodyJson.toRequestBody(contentType)
+            builder.post(requestBody)
+        }
+
+        return builder.build()
     }
 }

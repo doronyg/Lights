@@ -2,48 +2,56 @@ package com.doronyg.mylightscontroller.services
 
 import ai.picovoice.porcupine.Porcupine
 import ai.picovoice.porcupine.PorcupineManager
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.os.PowerManager
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import androidx.core.app.NotificationCompat
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.R
+import com.doronyg.mylightscontroller.commands.CommandParser
+import com.doronyg.mylightscontroller.commands.CommandType
+import com.doronyg.mylightscontroller.commands.ParsedVoiceOutput
 import com.doronyg.mylightscontroller.commands.VoiceCommand
 import com.doronyg.mylightscontroller.ha.DeviceType
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HomeAssistantApi
+import com.doronyg.mylightscontroller.ui.MainActivity
 import com.doronyg.mylightscontroller.utils.Utils
 
 class VoiceControllerService : Service() {
 
     companion object {
-        private const val TAG = "VoiceControllerService"
         private const val CHANNEL_ID = "voice_service_channel"
         private const val NOTIFICATION_ID = 1
     }
 
     private var porcupineManager: PorcupineManager? = null
     private var speechRecognizer: SpeechRecognizer? = null
-//    private var nluModel : VoiceNluModel? = null
+
     private var haLights : List<HaDevice> = emptyList()
+
+    private var wakeLock : PowerManager.WakeLock? = null
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification())
         initPorcupine()
-//        nluModel = VoiceNluModel(applicationContext)
+        acquireWakeLock()
+
         HomeAssistantApi.fetchAllLights { lights ->
             haLights = lights
             haLights.forEach { Utils.log("light: $it") }
@@ -51,8 +59,40 @@ class VoiceControllerService : Service() {
         Utils.log( "VoiceControllerService created")
     }
 
+    /**
+     * Acquires a partial WakeLock to ensure continuous hotword detection while the device is asleep.
+     *
+     * Even though this service runs in the foreground, many Android devices (especially older ones)
+     * will suspend or throttle microphone capture and background threads once the screen has been off
+     * for some time. Holding a PARTIAL_WAKE_LOCK keeps the CPU running so that the voice recognition
+     * and command processing remain reliable while the phone is locked or in deep sleep.
+     *
+     * This is necessary for the core use case of the app: always-on, hands-free voice control of
+     * Home Assistant devices.
+     */
+    @SuppressLint("WakelockTimeout")
+    private fun acquireWakeLock() {
+        if (wakeLock == null) {
+            val pm = getSystemService(POWER_SERVICE) as PowerManager
+            wakeLock = pm.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK,
+                "LightsController:Hotword"
+            )
+            wakeLock?.acquire()
+        }
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Utils.log("VoiceControllerService onStartCommand")
+        return START_STICKY
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        wakeLock?.let {
+            if (it.isHeld) it.release()
+        }
+        wakeLock = null
         porcupineManager?.stop()
         porcupineManager?.delete()
         stopSpeechRecognizer(false)
@@ -74,17 +114,23 @@ class VoiceControllerService : Service() {
     }
 
     private fun buildNotification(): Notification {
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Voice Controller Service")
             .setContentText("Listening for hotword...")
             .setSmallIcon(R.mipmap.ic_bee_launcher)
+            .setContentIntent(pendingIntent)
             .setOngoing(true)
             .build()
     }
 
     private fun initPorcupine() {
         try {
-            porcupineManager = PorcupineManager.Builder()
+            porcupineManager = porcupineManager ?: PorcupineManager.Builder()
                 .setAccessKey(Config.PORCUPINE_API_KEY)
                 .setKeyword(Porcupine.BuiltInKeyword.BUMBLEBEE)
                 .setSensitivity(0.5f)
@@ -96,7 +142,7 @@ class VoiceControllerService : Service() {
             porcupineManager?.start()
             Utils.log( "Porcupine initialized and started")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize Porcupine: ${e.message}")
+            Utils.log("Failed to initialize Porcupine: ${e.message}")
         }
     }
 
@@ -106,10 +152,14 @@ class VoiceControllerService : Service() {
         Utils.post({
             Utils.log( "startListeningForCommand()")
             startListeningForCommand()
-        }, 1000)
+        }, 800)
     }
 
     private fun startListeningForCommand() {
+        if (speechRecognizer != null) {
+            return
+        }
+
         if (!SpeechRecognizer.isRecognitionAvailable(this)) return
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
@@ -146,7 +196,6 @@ class VoiceControllerService : Service() {
         }
 
         speechRecognizer?.startListening(intent)
-
     }
 
     private fun stopSpeechRecognizer(restartPorcupine : Boolean = true) {
@@ -157,7 +206,7 @@ class VoiceControllerService : Service() {
             if (restartPorcupine) {
                 Utils.post({
                     Utils.log("STT stopped and destroyed, ready for next hotword")
-                    porcupineManager?.start()
+                    initPorcupine()
                 }, 1000)
             }
         }, 500)

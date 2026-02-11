@@ -1,4 +1,4 @@
-package com.doronyg.mylightscontroller.services
+package com.doronyg.mylightscontroller.commands
 
 import com.doronyg.mylightscontroller.utils.Utils
 
