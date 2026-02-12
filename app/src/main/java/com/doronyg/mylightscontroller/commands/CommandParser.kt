@@ -47,11 +47,8 @@ object CommandParser {
             return ParsedVoiceOutput(CommandType.UNKNOWN, null)
         }
 
-        // 1. Extract Device FIRST (using original text to avoid "Bedroom 2" -> "Bedroom two" mismatch)
-        // We sort names by length descending so "Kitchen Table Light" matches before "Kitchen"
-        val device = haLightsNames
-            .sortedByDescending { it.length }
-            .find { normalize(it) in normalizedText }
+        // 1. Extract Device
+        val device = findMatchingDevice(normalizedText, haLightsNames)
 
         // 2. Normalize numbers for intent and brightness parsing
         val processedText = replaceNumberWords(normalizedText)
@@ -91,6 +88,78 @@ object CommandParser {
             Utils.log("parseText() command -> $parsedVoiceOutput")
             parsedVoiceOutput
         } else null
+    }
+
+    /**
+     * Generates alternative device name variants for "special" devices.
+     *
+     * - For devices ending with "bedroom", we create a variant with "bedroom" stripped.
+     * - For devices containing "room", we create merged and split variants to handle STT variations.
+     *
+     * Returns a list of pairs: (originalDeviceName, variantName)
+     */
+    fun generateNormalizedSpecialDeviceVariants(haLightsNames: List<String>): List<Pair<String, String>> {
+        val result = mutableListOf<Pair<String, String>>()
+
+        haLightsNames.forEach { name ->
+            val normalized = normalize(name)
+
+            // Bedroom devices: strip "bedroom" suffix
+            if (normalized.endsWith(" bedroom")) {
+                val stripped = normalized.removeSuffix(" bedroom").trim()
+                result.add(name to stripped)
+            }
+            // Devices containing "room" (e.g., Playroom, Mud room)
+            else if (normalized.contains("room")) {
+                // Merge only the "room" with preceding word if there is a space
+                val merged = normalized.replace(Regex("\\s+room\\b"), "room").trim()
+                result.add(name to merged)
+
+                // Split "room" if it was merged: e.g., "playroom" -> "play room"
+                val split = normalized.replace(Regex("([a-z])room\\b"), "$1 room").trim()
+                result.add(name to split)
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Attempts to resolve a Home Assistant device name from a normalized voice command.
+     *
+     * Matching strategy:
+     * 1. Direct match against full device names (longest names first).
+     *    This prevents partial matches like "Kitchen" winning over
+     *    "Kitchen Table Light".
+     *
+     * 2. Fallback to special-name variants (e.g., stripping "bedroom",
+     *    handling "room" vs "playroom" variations).
+     *
+     * @param commandNormalized The already-normalized voice command text.
+     * @param haLightsNames The original HA device friendly names.
+     * @return The original device name if matched, otherwise null.
+     */
+    private fun findMatchingDevice(
+        commandNormalized: String,
+        haLightsNames: List<String>
+    ): String? {
+
+        // Sort once so longer names take priority over shorter ones
+        val sortedHaLights = haLightsNames.sortedByDescending { it.length }
+
+        // First pass: Try matching the full normalized device name directly
+        var device: String? = sortedHaLights
+            .firstOrNull { normalize(it) in commandNormalized }
+
+        // Second pass: If no direct match was found, try special-case variants
+        // (e.g., "master bedroom" -> "master", "mud room" <-> "mudroom")
+        if (device == null) {
+            device = generateNormalizedSpecialDeviceVariants(sortedHaLights)
+                .firstOrNull { (_, variant) -> variant in commandNormalized }
+                ?.first
+        }
+
+        return device
     }
 
     private fun normalize(text: String): String {
