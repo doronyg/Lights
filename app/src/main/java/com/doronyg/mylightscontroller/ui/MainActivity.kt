@@ -1,13 +1,10 @@
 package com.doronyg.mylightscontroller.ui
 
 import android.Manifest
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.doronyg.mylightscontroller.R
@@ -27,26 +24,19 @@ class MainActivity : AppCompatActivity() {
         }
 
         requestPermissions()
-        startService()
-    }
-
-    private fun startService() {
-        if (checkPermission()) {
-            val intent = Intent(this, VoiceControllerService::class.java)
-            ContextCompat.startForegroundService(this, intent)
-        }
+        VoiceControllerService.startService(this, false)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String?>, grantResults: IntArray, deviceId: Int) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
-        startService()
+        VoiceControllerService.startService(this, false)
     }
 
     private fun requestPermissions() {
-        if (!checkPermission()) {
+        if (!Utils.checkAppPermissions(this)) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), 1)
         }
     }
 
-    private fun checkPermission(): Boolean = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+
 }

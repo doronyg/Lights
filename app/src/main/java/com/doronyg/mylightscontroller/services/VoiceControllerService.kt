@@ -8,6 +8,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -19,6 +20,7 @@ import android.speech.SpeechRecognizer
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.R
 import com.doronyg.mylightscontroller.commands.CommandParser
@@ -36,6 +38,20 @@ class VoiceControllerService : Service() {
     companion object {
         private const val CHANNEL_ID = "voice_service_channel"
         private const val NOTIFICATION_ID = 1
+
+        private var createdByBoot : Boolean? = null
+
+        fun startService(context: Context, boot: Boolean) {
+            if (Utils.checkAppPermissions(context)) {
+                createdByBoot = this.createdByBoot ?: boot
+                val serviceIntent = Intent(context, VoiceControllerService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ContextCompat.startForegroundService(context, serviceIntent)
+                } else {
+                    context.startService(serviceIntent)
+                }
+            }
+        }
     }
 
     private var porcupineManager: PorcupineManager? = null
@@ -47,6 +63,12 @@ class VoiceControllerService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        Utils.appContext = applicationContext
+        Utils.post({createDependencies()}, if (createdByBoot == true) 30000 else 0)
+        Utils.log( "VoiceControllerService created")
+    }
+
+    private fun createDependencies() {
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification())
         initPorcupine()
@@ -56,7 +78,7 @@ class VoiceControllerService : Service() {
             haLights = lights
             haLights.forEach { Utils.log("light: $it") }
         }
-        Utils.log( "VoiceControllerService created")
+        Utils.log( "VoiceControllerService createDependencies() done")
     }
 
     /**
@@ -134,6 +156,7 @@ class VoiceControllerService : Service() {
                 .setAccessKey(Config.PORCUPINE_API_KEY)
                 .setKeyword(Porcupine.BuiltInKeyword.BUMBLEBEE)
                 .setSensitivity(0.5f)
+                .setErrorCallback { error -> Utils.log("PorcupineException: ${error?.message}") }
                 .build(applicationContext) { keywordIndex ->
                     Utils.log( "Hotword detected! Index: $keywordIndex")
                     onHotwordDetected()

@@ -1,8 +1,11 @@
 package com.doronyg.mylightscontroller.utils
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Handler
 import android.util.Log
+import androidx.core.content.ContextCompat
 import okhttp3.MediaType.Companion.toMediaType
 
 object Utils {
@@ -11,9 +14,11 @@ object Utils {
 
     var appContext: Context? = null
         set(value) {
-            field = value
-            value?.let {
-                handler = Handler(it.mainLooper)
+            if (field == null) {
+                field = value
+                value?.let {
+                    handler = Handler(it.mainLooper)
+                }
             }
         }
 
@@ -32,4 +37,6 @@ object Utils {
             }
         }
     }
+
+    fun checkAppPermissions(context: Context): Boolean = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 }
