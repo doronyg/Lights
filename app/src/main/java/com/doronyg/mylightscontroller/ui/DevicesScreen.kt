@@ -1,9 +1,7 @@
 package com.doronyg.mylightscontroller.ui
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -18,13 +16,36 @@ fun DevicesScreen(
     val devices by viewModel.devices.collectAsState()
     val loading by viewModel.loading.collectAsState()
 
-    Column {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
         if (loading) {
-            Text("Loading...", modifier = Modifier.padding(8.dp))
+            Text(
+                "Loading...",
+                modifier = Modifier.padding(12.dp)
+            )
         }
 
-        LazyColumn {
-            items(devices) { device ->
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(vertical = 12.dp)
+        ) {
+            items(
+                items = devices,
+                key = { it.entityId },
+                span = { device ->
+                    if (device.dimmable && device.isOn)
+                        GridItemSpan(2)   // Full width
+                    else
+                        GridItemSpan(1)   // Half width
+                }
+            ) { device ->
+
                 DeviceRow(
                     device = device,
                     onClick = {
@@ -42,4 +63,3 @@ fun DevicesScreen(
         }
     }
 }
-
