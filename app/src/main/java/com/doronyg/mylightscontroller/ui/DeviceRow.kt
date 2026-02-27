@@ -1,6 +1,8 @@
 package com.doronyg.mylightscontroller.ui
 
+import android.R.attr.lineHeight
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,10 +16,12 @@ import com.doronyg.mylightscontroller.ha.HaDevice
 
 private val LightOnBackground = Color(0xFFFFE9A3)
 private val LightOnContent = Color(0xFF5C4400)
+private val twoLineHeight = 48.dp
 
 @Composable
 fun DeviceRow(
     device: HaDevice,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
     onBrightnessChange: ((Int) -> Unit)? = null
 ) {
@@ -40,10 +44,11 @@ fun DeviceRow(
             MaterialTheme.colorScheme.onSurfaceVariant
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 6.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .animateContentSize(),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
@@ -62,13 +67,22 @@ fun DeviceRow(
 
             Spacer(Modifier.width(12.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                   verticalArrangement = Arrangement.Center) {
 
-                Text(
-                    text = device.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = contentColor
-                )
+                Box(
+                    modifier = Modifier.height(twoLineHeight),
+                    contentAlignment = Alignment.CenterStart // vertical centering
+                ) {
+                    Text(
+                        text = device.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = contentColor,
+                        maxLines = 2
+                    )
+                }
 
                 if (device.dimmable && device.isOn) {
                     Spacer(Modifier.height(8.dp))
