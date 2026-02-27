@@ -183,7 +183,10 @@ class VoiceControllerService : Service() {
             return
         }
 
-        if (!SpeechRecognizer.isRecognitionAvailable(this)) return
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            Utils.log( "SpeechRecognizer.isRecognitionAvailable() returns false")
+            return
+        }
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
 
