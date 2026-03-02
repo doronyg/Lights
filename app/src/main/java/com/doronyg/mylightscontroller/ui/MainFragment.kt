@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 
-class DevicesFragment : Fragment() {
+class MainFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -16,7 +16,7 @@ class DevicesFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                DevicesScreen()
+                MainScreen()
             }
         }
     }

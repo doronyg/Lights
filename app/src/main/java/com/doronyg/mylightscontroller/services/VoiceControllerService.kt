@@ -23,6 +23,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.R
+import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.commands.CommandParser
 import com.doronyg.mylightscontroller.commands.CommandType
 import com.doronyg.mylightscontroller.commands.ParsedVoiceOutput
@@ -42,7 +43,7 @@ class VoiceControllerService : Service() {
         private var createdByBoot : Boolean? = null
 
         fun startService(context: Context, boot: Boolean) {
-            if (Utils.checkAppPermissions(context)) {
+            if (Utils.checkAppPermissions(context) && Settings.withVoiceControllerService) {
                 createdByBoot = this.createdByBoot ?: boot
                 val serviceIntent = Intent(context, VoiceControllerService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -51,6 +52,11 @@ class VoiceControllerService : Service() {
                     context.startService(serviceIntent)
                 }
             }
+        }
+
+        fun stopService(context: Context) {
+            val intent = Intent(context, VoiceControllerService::class.java)
+            context.stopService(intent)
         }
     }
 

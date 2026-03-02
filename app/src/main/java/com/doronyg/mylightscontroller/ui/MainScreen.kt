@@ -25,7 +25,7 @@ sealed class BottomTab(val title: String) {
 }
 
 @Composable
-fun DevicesScreen(
+fun MainScreen(
     viewModel: DevicesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val devices by viewModel.devices.collectAsState()
@@ -91,12 +91,7 @@ fun DevicesScreen(
                     DeviceGrid(unavailableDevices, viewModel)
                 }
                 BottomTab.Settings -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Settings coming soon")
-                    }
+                    SettingsScreen()
                 }
             }
         }
