@@ -3,7 +3,7 @@ package com.doronyg.mylightscontroller.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.doronyg.mylightscontroller.ha.HaDevice
-import com.doronyg.mylightscontroller.ha.HomeAssistantApi
+import com.doronyg.mylightscontroller.ha.HomeAssistantInterface
 import com.doronyg.mylightscontroller.utils.Utils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,7 @@ class DevicesViewModel : ViewModel() {
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
-    val homeAssistantListener  = object : HomeAssistantApi.Listener {
+    val homeAssistantListener  = object : HomeAssistantInterface.Listener {
         override fun onUpdate() {
             delayedRefresh()
         }
@@ -25,11 +25,11 @@ class DevicesViewModel : ViewModel() {
 
     init {
         refresh()
-        HomeAssistantApi.registerListener(homeAssistantListener)
+        HomeAssistantRepository.instance.registerListener(homeAssistantListener)
     }
 
     override fun onCleared() {
-        HomeAssistantApi.deregisterListener(homeAssistantListener)
+        HomeAssistantRepository.instance.deregisterListener(homeAssistantListener)
         super.onCleared()
     }
 
@@ -38,7 +38,7 @@ class DevicesViewModel : ViewModel() {
             _loading.value = true
         }
 
-        HomeAssistantApi.fetchAllLights(true) { list ->
+        HomeAssistantRepository.instance.fetchAllLights(true) { list ->
             viewModelScope.launch {
                 _devices.value = list
                 _loading.value = false
@@ -47,11 +47,11 @@ class DevicesViewModel : ViewModel() {
     }
 
     fun turnOn(devices: List<HaDevice>, brightnessPct: Int? = null) {
-        HomeAssistantApi.turnOnLights(devices, brightnessPct)
+        HomeAssistantRepository.instance.turnOnLights(devices, brightnessPct)
     }
 
     fun turnOff(devices: List<HaDevice>) {
-        HomeAssistantApi.turnOffLights(devices)
+        HomeAssistantRepository.instance.turnOffLights(devices)
     }
 
     private fun delayedRefresh() {

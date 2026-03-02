@@ -1,24 +1,21 @@
 package com.doronyg.mylightscontroller.ui
 
-import com.doronyg.mylightscontroller.Settings
-
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.services.VoiceControllerService
 
 @Composable
 fun SettingsScreen() {
     val context = LocalContext.current
-
-    var withVoiceControllerService by remember {
-        mutableStateOf(Settings.withVoiceControllerService)
-    }
 
     Column(
         modifier = Modifier
@@ -33,48 +30,32 @@ fun SettingsScreen() {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Column(modifier = Modifier.weight(1f)) {
-
-                    Text(
-                        text = "Voice Controller Service",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-
-                    Spacer(Modifier.height(4.dp))
-
-                    Text(
-                        text = "Enable background voice detection service",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        // Voice Controller Service
+        SettingsSwitch(
+            title = "Voice Controller Service",
+            description = "Enable background voice detection service",
+            pref = Settings::withVoiceControllerService,
+            onToggle = { enabled ->
+                if (enabled) {
+                    VoiceControllerService.startService(context, boot = false)
+                } else {
+                    VoiceControllerService.stopService(context)
                 }
-
-                Switch(
-                    checked = withVoiceControllerService,
-                    onCheckedChange = { enabled ->
-                        withVoiceControllerService = enabled
-                        Settings.withVoiceControllerService = enabled
-
-                        if (enabled) {
-                            VoiceControllerService.startService(context, boot = false)
-                        } else {
-                            VoiceControllerService.stopService(context)
-                        }
-                    }
-                )
             }
-        }
+        )
+
+        // Save Mock HA Data
+        SettingsSwitch(
+            title = "Save mock HA data",
+            description = "Save the last Home Assistant data locally for testing",
+            pref = Settings::saveMockHaData
+        )
+
+        // Use Mock HA Data
+        SettingsSwitch(
+            title = "Use mock HA data",
+            description = "Use saved Home Assistant data instead of the network",
+            pref = Settings::useMockHaData
+        )
     }
 }

@@ -30,7 +30,6 @@ import com.doronyg.mylightscontroller.commands.ParsedVoiceOutput
 import com.doronyg.mylightscontroller.commands.VoiceCommand
 import com.doronyg.mylightscontroller.ha.DeviceType
 import com.doronyg.mylightscontroller.ha.HaDevice
-import com.doronyg.mylightscontroller.ha.HomeAssistantApi
 import com.doronyg.mylightscontroller.ui.MainActivity
 import com.doronyg.mylightscontroller.utils.Utils
 
@@ -80,7 +79,7 @@ class VoiceControllerService : Service() {
         initPorcupine()
         acquireWakeLock()
 
-        HomeAssistantApi.fetchAllLights { lights ->
+        HomeAssistantRepository.instance.fetchAllLights { lights ->
             haLights = lights
             haLights.forEach { Utils.log("light: $it") }
         }
@@ -281,13 +280,13 @@ class VoiceControllerService : Service() {
         when (command) {
             is VoiceCommand.TurnOn -> {
                 val device = findDeviceByName(command.deviceName) ?: return
-                HomeAssistantApi.turnOnLights(listOf(device), brightnessPct = command.brightness)
+                HomeAssistantRepository.instance.turnOnLights(listOf(device), brightnessPct = command.brightness)
             }
 
             is VoiceCommand.TurnOff -> {
                 val device = findDeviceByName(command.deviceName) ?: return
                 if (device.type == DeviceType.LIGHT || device.type == DeviceType.SWITCH) {
-                    HomeAssistantApi.turnOffLights(listOf(device)) // use same method for switches
+                    HomeAssistantRepository.instance.turnOffLights(listOf(device)) // use same method for switches
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.doronyg.mylightscontroller.ha
 import com.doronyg.mylightscontroller.Config
+import com.doronyg.mylightscontroller.ha.HomeAssistantInterface.Listener
 import com.doronyg.mylightscontroller.utils.NetworkUtils
 import com.doronyg.mylightscontroller.utils.NetworkUtils.HttpMethod
 import com.doronyg.mylightscontroller.utils.Utils
@@ -15,11 +16,7 @@ import okhttp3.Response
 import java.io.IOException
 import java.lang.ref.WeakReference
 
-object HomeAssistantApi {
-
-    interface Listener {
-        fun onUpdate()
-    }
+object HomeAssistantApi : HomeAssistantInterface {
 
     private val gson = Gson()
     private val typeTokenType = object : TypeToken<List<HaDevice>>() {}.type
@@ -40,19 +37,19 @@ object HomeAssistantApi {
         return null
     }
 
-    fun registerListener(listener: Listener) {
+    override fun registerListener(listener: Listener) {
         cleanupListeners()
         if (findListener(listener) == null) {
             listeners.add(WeakReference(listener))
         }
     }
 
-    fun deregisterListener(listener: Listener) {
+    override fun deregisterListener(listener: Listener) {
         findListener(listener)?.let { listeners.remove(it) }
     }
 
     // Fetch all lights
-    fun fetchAllLights(refresh: Boolean = true, onResult: (List<HaDevice>) -> Unit) {
+    override fun fetchAllLights(refresh: Boolean, onResult: (List<HaDevice>) -> Unit) {
         if (!refresh && haLights.isNotEmpty()) {
             Utils.post({ onResult(haLights) })
             return
@@ -86,7 +83,7 @@ object HomeAssistantApi {
     }
 
     // Turn on lights
-    fun turnOnLights(devices: List<HaDevice>, brightnessPct: Int? = null) {
+    override fun turnOnLights(devices: List<HaDevice>, brightnessPct: Int?) {
         val (lights, switches) = devicesToTypes(devices)
 
         if (lights.isNotEmpty()) {
@@ -103,7 +100,7 @@ object HomeAssistantApi {
     }
 
     // Turn off lights
-    fun turnOffLights(devices: List<HaDevice>) {
+    override fun turnOffLights(devices: List<HaDevice>) {
         val (lights, switches) = devicesToTypes(devices)
 
         if (lights.isNotEmpty()) {

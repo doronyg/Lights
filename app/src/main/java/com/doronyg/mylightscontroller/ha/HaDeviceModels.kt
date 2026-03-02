@@ -8,6 +8,7 @@ data class HaAttributes(
     @SerializedName("friendly_name") val friendlyName: String?,
     @SerializedName("area_id") val areaId: String?,
     @SerializedName("supported_features") val supportedFeatures: Int = 0,
+    @SerializedName("supported_color_modes") val supportedColorModes: List<String>? = null,
     @SerializedName("brightness") val brightness: Int? = null
 ) {
     val brightnessPct: Int?
@@ -34,7 +35,14 @@ data class HaDevice(
         get() = attributes.areaId
 
     val dimmable: Boolean
-        get() = attributes.brightness != null
+        get() {
+            // Modern HA (preferred)
+            attributes.supportedColorModes?.let { modes ->
+                return modes.any { it != "onoff" }
+            }
+            // Fallback
+            return attributes.brightness != null
+        }
 
     val isOn: Boolean
         get() = state == "on"
