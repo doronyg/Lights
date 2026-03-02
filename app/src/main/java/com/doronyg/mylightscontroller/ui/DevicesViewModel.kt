@@ -1,5 +1,6 @@
 package com.doronyg.mylightscontroller.ui
 
+import HomeAssistantRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.doronyg.mylightscontroller.ha.HaDevice

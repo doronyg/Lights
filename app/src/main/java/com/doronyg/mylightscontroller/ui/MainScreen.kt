@@ -1,21 +1,36 @@
 package com.doronyg.mylightscontroller.ui
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.ha.HaDevice
-import androidx.compose.foundation.lazy.grid.items
 
 // --- Tabs ---
 sealed class BottomTab(val title: String) {
@@ -32,9 +47,12 @@ fun MainScreen(
     val loading by viewModel.loading.collectAsState()
     var selectedTab by remember { mutableStateOf<BottomTab>(BottomTab.Main) }
 
+    val contentColor = MaterialTheme.colorScheme.onBackground
+
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 // Main tab
                 NavigationBarItem(
                     selected = selectedTab == BottomTab.Main,
@@ -72,12 +90,18 @@ fun MainScreen(
             }
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .padding(12.dp)
+        ) {
 
             if (loading) {
                 Text(
                     "Loading...",
-                    modifier = Modifier.padding(12.dp)
+                    modifier = Modifier.padding(12.dp),
+                    color = contentColor
                 )
             }
 

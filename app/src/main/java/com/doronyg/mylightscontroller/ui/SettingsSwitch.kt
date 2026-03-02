@@ -11,6 +11,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -27,15 +28,20 @@ fun SettingsSwitch(
     pref: KMutableProperty0<Boolean>, // reference to Settings property
     onToggle: ((Boolean) -> Unit)? = null
 ) {
-    // Compose state
     val checkedState = remember { mutableStateOf(pref.get()) }
+
+    // Colors for the switch thumb/track when checked
+    val (switchThumbColor, switchTrackColor) = lightOnColors()
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant // off-color
+        )
     ) {
         Row(
             modifier = Modifier
@@ -48,7 +54,8 @@ fun SettingsSwitch(
 
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(Modifier.height(4.dp))
@@ -63,10 +70,16 @@ fun SettingsSwitch(
             Switch(
                 checked = checkedState.value,
                 onCheckedChange = { enabled ->
-                    checkedState.value = enabled   // update Compose state
-                    pref.set(enabled)             // write to Settings
-                    onToggle?.invoke(enabled)     // optional side effect
-                }
+                    checkedState.value = enabled
+                    pref.set(enabled)
+                    onToggle?.invoke(enabled)
+                },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = switchThumbColor,
+                    checkedTrackColor = switchTrackColor.copy(alpha = 0.5f),
+                    uncheckedThumbColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    uncheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                )
             )
         }
     }

@@ -1,21 +1,36 @@
 package com.doronyg.mylightscontroller.ui
 
-import android.R.attr.lineHeight
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.ha.HaDevice
 
-private val LightOnBackground = Color(0xFFFFE9A3)
-private val LightOnContent = Color(0xFF5C4400)
 private val twoLineHeight = 48.dp
 
 @Composable
@@ -29,19 +44,15 @@ fun DeviceRow(
         mutableFloatStateOf(device.attributes.brightnessPct?.toFloat() ?: 0f)
     }
 
+    val (lightOnBackground, lightOnContent) = lightOnColors()
     val backgroundColor by animateColorAsState(
-        targetValue = if (device.isOn)
-            LightOnBackground
-        else
-            MaterialTheme.colorScheme.surfaceVariant,
+        targetValue = if (device.isOn) lightOnBackground
+        else MaterialTheme.colorScheme.surfaceVariant,
         label = "deviceBackground"
     )
 
-    val contentColor =
-        if (device.isOn)
-            LightOnContent
-        else
-            MaterialTheme.colorScheme.onSurfaceVariant
+    val contentColor = if (device.isOn) lightOnContent
+    else MaterialTheme.colorScheme.onSurfaceVariant
 
     Card(
         modifier = modifier
@@ -67,14 +78,16 @@ fun DeviceRow(
 
             Spacer(Modifier.width(12.dp))
 
-            Column(modifier = Modifier
+            Column(
+                modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
-                   verticalArrangement = Arrangement.Center) {
+                verticalArrangement = Arrangement.Center
+            ) {
 
                 Box(
                     modifier = Modifier.height(twoLineHeight),
-                    contentAlignment = Alignment.CenterStart // vertical centering
+                    contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
                         text = device.name,
@@ -95,9 +108,9 @@ fun DeviceRow(
                         },
                         valueRange = 0f..100f,
                         colors = SliderDefaults.colors(
-                            thumbColor = LightOnContent,
-                            activeTrackColor = LightOnContent,
-                            inactiveTrackColor = LightOnContent.copy(alpha = 0.3f)
+                            thumbColor = lightOnContent,
+                            activeTrackColor = lightOnContent,
+                            inactiveTrackColor = lightOnContent.copy(alpha = 0.3f)
                         )
                     )
                 }

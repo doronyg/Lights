@@ -16,7 +16,9 @@ class MainFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                MainScreen()
+                MyTheme {
+                    MainScreen()
+                }
             }
         }
     }
