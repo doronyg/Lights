@@ -1,6 +1,7 @@
 package com.doronyg.mylightscontroller.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -127,39 +128,49 @@ fun DeviceGrid(
     devices: List<HaDevice>,
     viewModel: DevicesViewModel
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(vertical = 12.dp)
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize()
     ) {
-        items(
-            items = devices,
-            key = { it.entityId },
-            span = { device ->
-                if (device.dimmable && device.isOn)
-                    GridItemSpan(2) // full width
-                else
-                    GridItemSpan(1) // half width
-            }
-        ) { device ->
-            DeviceRow(
-                device = device,
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    if (device.isOn) {
-                        viewModel.turnOff(listOf(device))
-                    } else {
-                        viewModel.turnOn(listOf(device))
-                    }
-                },
-                onBrightnessChange = { newBrightness ->
-                    viewModel.turnOn(listOf(device), newBrightness)
+        val isCompact = maxWidth < 420.dp
+        val columnCount = if (isCompact) 2 else 3
+
+        val horizontalPadding = if (isCompact) 4.dp else 8.dp
+        val spacing = if (isCompact) 6.dp else 12.dp
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(columnCount),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = horizontalPadding),
+            horizontalArrangement = Arrangement.spacedBy(spacing),
+            verticalArrangement = Arrangement.spacedBy(spacing),
+            contentPadding = PaddingValues(vertical = spacing)
+        ) {
+            items(
+                items = devices,
+                key = { it.entityId },
+                span = { device ->
+                    if (device.dimmable && device.isOn)
+                        GridItemSpan(columnCount)   // full width dynamically
+                    else
+                        GridItemSpan(1)
                 }
-            )
+            ) { device ->
+                DeviceRow(
+                    device = device,
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        if (device.isOn) {
+                            viewModel.turnOff(listOf(device))
+                        } else {
+                            viewModel.turnOn(listOf(device))
+                        }
+                    },
+                    onBrightnessChange = { newBrightness ->
+                        viewModel.turnOn(listOf(device), newBrightness)
+                    }
+                )
+            }
         }
     }
 }

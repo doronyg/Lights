@@ -1,10 +1,12 @@
 package com.doronyg.mylightscontroller.ui
 
+import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -45,74 +47,87 @@ fun DeviceRow(
     }
 
     val (lightOnBackground, lightOnContent) = lightOnColors()
+
     val backgroundColor by animateColorAsState(
         targetValue = if (device.isOn) lightOnBackground
         else MaterialTheme.colorScheme.surfaceVariant,
         label = "deviceBackground"
     )
 
-    val contentColor = if (device.isOn) lightOnContent
-    else MaterialTheme.colorScheme.onSurfaceVariant
+    val contentColor =
+        if (device.isOn) lightOnContent
+        else MaterialTheme.colorScheme.onSurfaceVariant
 
-    Card(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .padding(vertical = 6.dp)
             .clickable(onClick = onClick)
-            .animateContentSize(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor)
+            .animateContentSize()
     ) {
-        Row(
+        // Container-based breakpoint
+        val horizontalPadding =
+            if (maxWidth < 420.dp) 4.dp else 12.dp
+
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RoomIcon(
-                device = device,
-                modifier = Modifier.size(36.dp),
-                tint = contentColor
+                .padding(horizontal = horizontalPadding),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = backgroundColor
             )
-
-            Spacer(Modifier.width(12.dp))
-
-            Column(
+        ) {
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.Center
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                RoomIcon(
+                    device = device,
+                    modifier = Modifier.size(36.dp),
+                    tint = contentColor
+                )
 
-                Box(
-                    modifier = Modifier.height(twoLineHeight),
-                    contentAlignment = Alignment.CenterStart
+                Spacer(Modifier.width(8.dp))
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = device.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = contentColor,
-                        maxLines = 2
-                    )
-                }
-
-                if (device.dimmable && device.isOn) {
-                    Spacer(Modifier.height(8.dp))
-
-                    Slider(
-                        value = sliderValue,
-                        onValueChange = { sliderValue = it },
-                        onValueChangeFinished = {
-                            onBrightnessChange?.invoke(sliderValue.toInt())
-                        },
-                        valueRange = 0f..100f,
-                        colors = SliderDefaults.colors(
-                            thumbColor = lightOnContent,
-                            activeTrackColor = lightOnContent,
-                            inactiveTrackColor = lightOnContent.copy(alpha = 0.3f)
+                    Box(
+                        modifier = Modifier.height(twoLineHeight),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Text(
+                            text = device.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = contentColor,
+                            maxLines = 2
                         )
-                    )
+                    }
+
+                    if (device.dimmable && device.isOn) {
+                        Spacer(Modifier.height(8.dp))
+
+                        Slider(
+                            value = sliderValue,
+                            onValueChange = { sliderValue = it },
+                            onValueChangeFinished = {
+                                onBrightnessChange?.invoke(sliderValue.toInt())
+                            },
+                            valueRange = 0f..100f,
+                            colors = SliderDefaults.colors(
+                                thumbColor = lightOnContent,
+                                activeTrackColor = lightOnContent,
+                                inactiveTrackColor = lightOnContent.copy(alpha = 0.3f)
+                            )
+                        )
+                    }
                 }
             }
         }
