@@ -30,14 +30,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.ha.HaDevice
 
 // --- Tabs ---
-sealed class BottomTab(val title: String) {
-    object Main : BottomTab("Main")
-    object Unavailable : BottomTab("Unavailable")
-    object Settings : BottomTab("Settings")
+enum class BottomTab(val title: String, val icon: ImageVector) {
+    Main("Main", Icons.Default.Lightbulb),
+    Unavailable("Unavailable", Icons.Default.PowerOff),
+    Settings("Settings", Icons.Default.Settings)
 }
 
 @Composable
@@ -46,48 +47,34 @@ fun MainScreen(
 ) {
     val devices by viewModel.devices.collectAsState()
     val loading by viewModel.loading.collectAsState()
-    var selectedTab by remember { mutableStateOf<BottomTab>(BottomTab.Main) }
+
+    var selectedTab by remember { mutableStateOf(BottomTab.Main) }
 
     val contentColor = MaterialTheme.colorScheme.onBackground
+    val unavailableCount = devices.count { it.state == "unavailable" }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                // Main tab
-                NavigationBarItem(
-                    selected = selectedTab == BottomTab.Main,
-                    onClick = { selectedTab = BottomTab.Main },
-                    icon = { Icon(Icons.Default.Lightbulb, contentDescription = "Main") },
-                    label = { Text("Main") }
-                )
-
-                // Unavailable tab with badge
-                val unavailableCount = devices.count { it.state == "unavailable" }
-                NavigationBarItem(
-                    selected = selectedTab == BottomTab.Unavailable,
-                    onClick = { selectedTab = BottomTab.Unavailable },
-                    icon = {
-                        BadgedBox(
-                            badge = {
-                                if (unavailableCount > 0) {
-                                    Badge { Text(unavailableCount.toString()) }
+                BottomTab.entries.forEach { tab ->
+                    NavigationBarItem(
+                        selected = selectedTab == tab,
+                        onClick = { selectedTab = tab },
+                        icon = {
+                            if (tab == BottomTab.Unavailable && unavailableCount > 0) {
+                                BadgedBox(
+                                    badge = { Badge { Text(unavailableCount.toString()) } }
+                                ) {
+                                    Icon(tab.icon, contentDescription = tab.title)
                                 }
+                            } else {
+                                Icon(tab.icon, contentDescription = tab.title)
                             }
-                        ) {
-                            Icon(Icons.Default.PowerOff, contentDescription = "Unavailable")
-                        }
-                    },
-                    label = { Text("Unavailable") }
-                )
-
-                // Settings tab
-                NavigationBarItem(
-                    selected = selectedTab == BottomTab.Settings,
-                    onClick = { selectedTab = BottomTab.Settings },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                    label = { Text("Settings") }
-                )
+                        },
+                        label = { Text(tab.title) }
+                    )
+                }
             }
         }
     ) { padding ->
