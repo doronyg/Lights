@@ -27,7 +27,7 @@ object HomeAssistantApiMock : HomeAssistantInterface {
     private fun loadDevices(): List<HaDevice> {
         val json = prefs?.getString(MOCK_DATA_KEY, null)
         return if (json != null) {
-            gson.fromJson<List<HaDevice>>(json, typeToken)
+            gson.fromJson(json, typeToken)
         } else {
             emptyList()
         }
