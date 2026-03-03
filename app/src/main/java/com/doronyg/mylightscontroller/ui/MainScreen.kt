@@ -1,16 +1,8 @@
 package com.doronyg.mylightscontroller.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PowerOff
@@ -32,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.doronyg.mylightscontroller.ha.HaDevice
 
 // --- Tabs ---
 enum class BottomTab(val title: String, val icon: ImageVector) {
@@ -95,68 +86,14 @@ fun MainScreen(
 
             when (selectedTab) {
                 BottomTab.Main -> {
-                    val availableDevices = devices.filter { it.state != "unavailable" }
-                    DeviceGrid(availableDevices, viewModel)
+                    DeviceGrid(devices.filter { !it.unavailable }, viewModel)
                 }
                 BottomTab.Unavailable -> {
-                    val unavailableDevices = devices.filter { it.state == "unavailable" }
-                    DeviceGrid(unavailableDevices, viewModel)
+                    DeviceGrid(devices.filter { it.unavailable }, viewModel)
                 }
                 BottomTab.Settings -> {
                     SettingsScreen()
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun DeviceGrid(
-    devices: List<HaDevice>,
-    viewModel: DevicesViewModel
-) {
-    BoxWithConstraints(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        val isCompact = maxWidth < 420.dp
-        val columnCount = if (isCompact) 2 else 3
-
-        val horizontalPadding = if (isCompact) 4.dp else 8.dp
-        val spacing = if (isCompact) 6.dp else 12.dp
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(columnCount),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = horizontalPadding),
-            horizontalArrangement = Arrangement.spacedBy(spacing),
-            verticalArrangement = Arrangement.spacedBy(spacing),
-            contentPadding = PaddingValues(vertical = spacing)
-        ) {
-            items(
-                items = devices,
-                key = { it.entityId },
-                span = { device ->
-                    if (device.dimmable && device.isOn)
-                        GridItemSpan(columnCount)   // full width dynamically
-                    else
-                        GridItemSpan(1)
-                }
-            ) { device ->
-                DeviceRow(
-                    device = device,
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        if (device.isOn) {
-                            viewModel.turnOff(listOf(device))
-                        } else {
-                            viewModel.turnOn(listOf(device))
-                        }
-                    },
-                    onBrightnessChange = { newBrightness ->
-                        viewModel.turnOn(listOf(device), newBrightness)
-                    }
-                )
             }
         }
     }

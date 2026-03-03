@@ -46,6 +46,9 @@ data class HaDevice(
 
     val isOn: Boolean
         get() = state == "on"
+
+    val unavailable : Boolean
+        get() = state == "unavailable"
 }
 
 
