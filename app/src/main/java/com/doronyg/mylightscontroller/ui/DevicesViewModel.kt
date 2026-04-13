@@ -20,7 +20,7 @@ class DevicesViewModel : ViewModel() {
 
     val homeAssistantListener  = object : HomeAssistantInterface.Listener {
         override fun onUpdate() {
-            delayedRefresh()
+            updateLightsValues(false)
         }
     }
 
@@ -39,7 +39,11 @@ class DevicesViewModel : ViewModel() {
             _loading.value = true
         }
 
-        HomeAssistantRepository.instance.fetchAllLights(true) { list ->
+        updateLightsValues(true)
+    }
+
+    private fun updateLightsValues(refresh : Boolean) {
+        HomeAssistantRepository.instance.fetchAllLights(refresh) { list ->
             viewModelScope.launch {
                 _devices.value = list
                 _loading.value = false
@@ -49,10 +53,12 @@ class DevicesViewModel : ViewModel() {
 
     fun turnOn(devices: List<HaDevice>, brightnessPct: Int? = null) {
         HomeAssistantRepository.instance.turnOnLights(devices, brightnessPct)
+        delayedRefresh()
     }
 
     fun turnOff(devices: List<HaDevice>) {
         HomeAssistantRepository.instance.turnOffLights(devices)
+        delayedRefresh()
     }
 
     private fun delayedRefresh() {

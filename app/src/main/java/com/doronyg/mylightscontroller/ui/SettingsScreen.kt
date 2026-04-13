@@ -44,6 +44,16 @@ fun SettingsScreen() {
             }
         )
 
+        // HA refresh interval
+        SettingsIntSlider(
+            title = "HA refresh interval",
+            description = "How often lights are refreshed while UI is visible",
+            pref = Settings::secondsForHaUpdateOnUi,
+            min = 5,
+            max = 300, // 5 minutes
+            suffix = "s"
+        )
+
         // Save Mock HA Data
         SettingsSwitch(
             title = "Save mock HA data",

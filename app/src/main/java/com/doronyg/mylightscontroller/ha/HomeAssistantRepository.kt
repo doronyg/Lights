@@ -1,12 +1,30 @@
 import com.doronyg.mylightscontroller.Settings
+import com.doronyg.mylightscontroller.Settings.secondsForHaUpdateOnUi
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HomeAssistantApi
 import com.doronyg.mylightscontroller.ha.HomeAssistantInterface
 import com.doronyg.mylightscontroller.ha.mock.HomeAssistantApiMock
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
 class HomeAssistantRepository private constructor() : HomeAssistantInterface {
 
-    private val listeners = mutableListOf<HomeAssistantInterface.Listener>()
+    private val listeners = mutableListOf< WeakReference<HomeAssistantInterface.Listener>>()
+
+    // --- UI presence tracking (separate from data listeners) ---
+    private var nextToken = 0
+    private val activeUiTokens = mutableSetOf<Int>()
+
+    // --- Polling ---
+    private var pollingIterationMillis = secondsForHaUpdateOnUi.coerceAtLeast(1).times(1000L)
+    private var pollingJob: Job? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private var api: HomeAssistantInterface =
         if (Settings.useMockHaData) HomeAssistantApiMock
@@ -14,7 +32,7 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
 
     private val apiListener = object : HomeAssistantInterface.Listener {
         override fun onUpdate() {
-            listeners.forEach { it.onUpdate() }
+            notifyListeners()
         }
     }
 
@@ -33,19 +51,30 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
             api.deregisterListener(apiListener)
             api = newApi
             api.registerListener(apiListener)
-            listeners.forEach { it.onUpdate() }
+            notifyListeners()
         }
     }
 
     // --- Listener management ---
+    private fun cleanupListeners() {
+        listeners.removeAll { it.get() == null }
+    }
+
     override fun registerListener(listener: HomeAssistantInterface.Listener) {
-        if (!listeners.contains(listener)) {
-            listeners.add(listener)
+        cleanupListeners()
+        if (listeners.none { it.get() == listener }) {
+            listeners.add(WeakReference(listener))
         }
     }
 
     override fun deregisterListener(listener: HomeAssistantInterface.Listener) {
-        listeners.remove(listener)
+        cleanupListeners()
+        listeners.removeAll { it.get() == listener || it.get() == null }
+    }
+
+    private fun notifyListeners() {
+        cleanupListeners()
+        listeners.forEach { it.get()?.onUpdate() }
     }
 
     // --- Fetch devices ---
@@ -63,6 +92,9 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
             }
 
             onResult(devices)
+            if (refresh) {
+                notifyListeners()
+            }
         }
     }
 
@@ -75,6 +107,48 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
     override fun turnOffLights(devices: List<HaDevice>) {
         ensureCorrectApi()
         api.turnOffLights(devices)
+    }
+
+    fun registerUi(): Int {
+        val token = nextToken++
+        activeUiTokens.add(token)
+
+        if (activeUiTokens.size == 1) {
+            startPolling()
+        }
+
+        return token
+    }
+
+    fun unregisterUi(token: Int) {
+        val removed = activeUiTokens.remove(token)
+        if (!removed) return // ignore invalid / double calls
+
+        if (activeUiTokens.isEmpty()) {
+            stopPolling()
+        }
+    }
+
+    // --- Polling control ---
+    private fun startPolling() {
+        if (pollingJob != null) return
+
+        pollingJob = scope.launch {
+            try {
+                while (isActive && activeUiTokens.isNotEmpty()) {
+                    fetchAllLights(true) {}
+                    delay(pollingIterationMillis)
+                }
+            } finally {
+                // Allow restart later
+                pollingJob = null
+            }
+        }
+    }
+
+    private fun stopPolling() {
+        pollingJob?.cancel()
+        pollingJob = null
     }
 
     companion object {

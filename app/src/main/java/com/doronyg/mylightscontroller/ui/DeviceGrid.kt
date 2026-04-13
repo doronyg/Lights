@@ -21,7 +21,7 @@ fun DeviceGrid(
     viewModel: DevicesViewModel
 ) {
     BoxWithConstraints(
-        modifier = Modifier.Companion.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         // Responsive column count based on width
         val columnCount = when {
@@ -35,7 +35,7 @@ fun DeviceGrid(
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(columnCount),
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = horizontalPadding),
             horizontalArrangement = Arrangement.spacedBy(spacing),
@@ -54,7 +54,7 @@ fun DeviceGrid(
             ) { device ->
                 DeviceRow(
                     device = device,
-                    modifier = Modifier.Companion.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         if (device.isOn) {
                             viewModel.turnOff(listOf(device))

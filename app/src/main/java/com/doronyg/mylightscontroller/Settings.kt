@@ -25,8 +25,20 @@ object Settings {
             }
         }
 
+    // --- Generic Int delegate ---
+    private fun intPref(key: String, default: Int = 0) =
+        object : ReadWriteProperty<Any, Int> {
+            override fun getValue(thisRef: Any, property: KProperty<*>): Int =
+                prefs?.getInt(key, default) ?: default
+
+            override fun setValue(thisRef: Any, property: KProperty<*>, value: Int) {
+                prefs?.edit { putInt(key, value) }
+            }
+        }
+
     // --- Settings ---
     var withVoiceControllerService by booleanPref("WITH_VOICE_CONTROLLER_SERVICE_SHARED_PREF")
+    var secondsForHaUpdateOnUi by intPref("SECONDS_FOR_HA_UPDATE_ON_UI", 30)
     var saveMockHaData by booleanPref("SAVE_MOCK_HA_DATA")
     var useMockHaData by booleanPref("USE_MOCK_HA_DATA")
 }
