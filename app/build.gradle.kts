@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+val withHardCodedSecrets = true
+
 android {
     namespace = "com.doronyg.mylightscontroller"
     compileSdk {
@@ -22,18 +24,22 @@ android {
         buildConfigField(
             "String",
             "HA_URL",
-            "\"${System.getenv("HA_URL") ?: ""}\""
+            if (withHardCodedSecrets) "\"${System.getenv("HA_URL") ?: ""}\"" else "\"\""
+
         )
         buildConfigField(
             "String",
             "HA_TOKEN",
-            "\"${System.getenv("HA_TOKEN") ?: ""}\""
+            if (withHardCodedSecrets) "\"${System.getenv("HA_TOKEN") ?: ""}\"" else "\"\""
         )
         buildConfigField(
             "String",
             "PORCUPINE_API_KEY",
-            "\"${System.getenv("PORCUPINE_API_KEY") ?: ""}\""
+            if (withHardCodedSecrets) "\"${System.getenv("PORCUPINE_API_KEY") ?: ""}\"" else "\"\""
         )
+
+        manifestPlaceholders["deepLinkScheme"] = "mylightscontroller"
+        manifestPlaceholders["deepLinkHostSetup"] = "setup"
     }
 
     buildTypes {
@@ -77,6 +83,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
     implementation(libs.androidx.ui)
     implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.foundation)
@@ -85,7 +92,10 @@ dependencies {
 
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
+    implementation("androidx.activity:activity-compose:1.13.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+
+    implementation("com.google.zxing:javase:3.5.4")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

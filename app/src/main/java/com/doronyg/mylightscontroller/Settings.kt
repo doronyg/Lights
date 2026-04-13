@@ -3,6 +3,8 @@ package com.doronyg.mylightscontroller
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.doronyg.mylightscontroller.utils.Base64Codec
+import com.doronyg.mylightscontroller.utils.StringCodec
 import com.doronyg.mylightscontroller.utils.Utils
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -35,6 +37,25 @@ object Settings {
                 prefs?.edit { putInt(key, value) }
             }
         }
+
+    fun stringPref(
+        key: String,
+        default: String = "",
+        codec: StringCodec = Base64Codec
+    ) = object : ReadWriteProperty<Any, String> {
+
+        override fun getValue(thisRef: Any, property: KProperty<*>): String {
+            val raw = prefs?.getString(key, null) ?: return default
+            return runCatching { codec.decode(raw) }.getOrDefault(default)
+        }
+
+        override fun setValue(thisRef: Any, property: KProperty<*>, value: String) {
+            val encoded = runCatching { codec.encode(value) }
+                .getOrDefault(value)
+
+            prefs?.edit { putString(key, encoded) }
+        }
+    }
 
     // --- Settings ---
     var withVoiceControllerService by booleanPref("WITH_VOICE_CONTROLLER_SERVICE_SHARED_PREF")

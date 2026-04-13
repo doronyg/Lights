@@ -28,6 +28,10 @@ object Utils {
         Log.i("VoiceControl", string)
     }
 
+    fun logException(e: Throwable, message : String? = null) {
+        log("Log exception: ${message ?: ""} - ${e.javaClass.canonicalName} - ${e.message}")
+    }
+
     fun post(runnable: Runnable, delay : Long? = null) {
         handler?.apply {
             if (delay == null) {
@@ -39,4 +43,5 @@ object Utils {
     }
 
     fun checkAppPermissions(context: Context): Boolean = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+
 }

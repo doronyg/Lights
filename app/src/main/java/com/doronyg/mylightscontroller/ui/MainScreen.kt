@@ -1,5 +1,6 @@
 package com.doronyg.mylightscontroller.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -7,8 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -16,14 +15,19 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+
+import com.doronyg.mylightscontroller.Config
+import com.doronyg.mylightscontroller.onboarding.models.AppConfig
+import com.doronyg.mylightscontroller.ui.Navigator.AppNavigator
+import com.doronyg.mylightscontroller.ui.Navigator.Screen
+import com.doronyg.mylightscontroller.ui.Navigator.UiEvent
 
 // --- Tabs ---
 enum class BottomTab(val title: String, val icon: ImageVector) {
@@ -39,36 +43,45 @@ fun MainScreen(
     val devices by viewModel.devices.collectAsState()
     val loading by viewModel.loading.collectAsState()
 
-    var selectedTab by remember { mutableStateOf(BottomTab.Main) }
+    val navigator = remember { AppNavigator() }
 
-    val contentColor = MaterialTheme.colorScheme.onBackground
-    val unavailableCount = devices.count { it.state == "unavailable" }
+    val canGoBack = navigator.stack.size > 1
+
+    BackHandler(enabled = canGoBack) {
+        navigator.handle(UiEvent.NavigateBack)
+    }
+
+    // initialize root once
+    LaunchedEffect(Unit) {
+        if (navigator.current == null) {
+            navigator.setRoot(Screen.Tab(BottomTab.Main))
+        }
+    }
+
+    val current = navigator.current ?: Screen.Tab(BottomTab.Main)
+
+    val showBottomBar = current is Screen.Tab
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                BottomTab.entries.forEach { tab ->
-                    NavigationBarItem(
-                        selected = selectedTab == tab,
-                        onClick = { selectedTab = tab },
-                        icon = {
-                            if (tab == BottomTab.Unavailable && unavailableCount > 0) {
-                                BadgedBox(
-                                    badge = { Badge { Text(unavailableCount.toString()) } }
-                                ) {
-                                    Icon(tab.icon, contentDescription = tab.title)
-                                }
-                            } else {
-                                Icon(tab.icon, contentDescription = tab.title)
-                            }
-                        },
-                        label = { Text(tab.title) }
-                    )
+            if (showBottomBar) {
+                NavigationBar {
+                    BottomTab.entries.forEach { tab ->
+                        NavigationBarItem(
+                            selected = current.tab == tab,
+                            onClick = {
+                                navigator.setRoot(Screen.Tab(tab))
+                            },
+                            icon = { Icon(tab.icon, contentDescription = tab.title) },
+                            label = { Text(tab.title) }
+                        )
+                    }
                 }
             }
         }
     ) { padding ->
+
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -77,24 +90,47 @@ fun MainScreen(
         ) {
 
             if (loading) {
-                Text(
-                    "Loading...",
-                    modifier = Modifier.padding(12.dp),
-                    color = contentColor
-                )
+                Text("Loading...")
             }
 
-            when (selectedTab) {
-                BottomTab.Main -> {
-                    DeviceGrid(devices.filter { !it.unavailable }, viewModel)
+            when (current) {
+
+                is Screen.Tab -> {
+                    when (current.tab) {
+
+                        BottomTab.Main -> {
+                            DeviceGrid(devices.filter { !it.unavailable }, viewModel)
+                        }
+
+                        BottomTab.Unavailable -> {
+                            DeviceGrid(devices.filter { it.unavailable }, viewModel)
+                        }
+
+                        BottomTab.Settings -> {
+                            SettingsScreen(
+                                onEvent = navigator::handle
+                            )
+                        }
+                    }
                 }
-                BottomTab.Unavailable -> {
-                    DeviceGrid(devices.filter { it.unavailable }, viewModel)
-                }
-                BottomTab.Settings -> {
-                    SettingsScreen()
+
+                Screen.SetupQr -> {
+                    SetupQrScreen(
+                        config = buildAppConfig(),
+                        onClose = {
+                            navigator.handle(UiEvent.NavigateBack)
+                        }
+                    )
                 }
             }
         }
     }
+}
+
+private fun buildAppConfig(): AppConfig {
+    return AppConfig(
+        homeAssistantUrl = Config.HOME_ASSISTANT_URL,
+        homeAssistantToken = Config.HOME_ASSISTANT_TOKEN,
+        porcupineApiKey = Config.PORCUPINE_API_KEY
+    )
 }

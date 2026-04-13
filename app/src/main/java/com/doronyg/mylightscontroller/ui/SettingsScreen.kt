@@ -1,9 +1,10 @@
 package com.doronyg.mylightscontroller.ui
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,60 +13,81 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.services.VoiceControllerService
+import com.doronyg.mylightscontroller.ui.Navigator.Screen
+import com.doronyg.mylightscontroller.ui.Navigator.UiEvent
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    onEvent: (UiEvent) -> Unit
+) {
     val context = LocalContext.current
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Top
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.Top,
+        contentPadding = PaddingValues(vertical = 16.dp)
     ) {
 
-        Text(
-            text = "Settings",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        item {
+            Text(
+                text = "Settings",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
 
-        // Voice Controller Service
-        SettingsSwitch(
-            title = "Voice Controller Service",
-            description = "Enable background voice detection service",
-            pref = Settings::withVoiceControllerService,
-            onToggle = { enabled ->
-                if (enabled) {
-                    VoiceControllerService.startService(context, boot = false)
-                } else {
-                    VoiceControllerService.stopService(context)
+        item {
+            SettingsSwitch(
+                title = "Voice Controller Service",
+                description = "Enable background voice detection service",
+                pref = Settings::withVoiceControllerService,
+                onToggle = { enabled ->
+                    if (enabled) {
+                        VoiceControllerService.startService(context, boot = false)
+                    } else {
+                        VoiceControllerService.stopService(context)
+                    }
                 }
-            }
-        )
+            )
+        }
 
-        // HA refresh interval
-        SettingsIntSlider(
-            title = "HA refresh interval",
-            description = "How often lights are refreshed while UI is visible",
-            pref = Settings::secondsForHaUpdateOnUi,
-            min = 5,
-            max = 300, // 5 minutes
-            suffix = "s"
-        )
+        item {
+            SettingsIntSlider(
+                title = "HA refresh interval",
+                description = "How often lights are refreshed while UI is visible",
+                pref = Settings::secondsForHaUpdateOnUi,
+                min = 5,
+                max = 300,
+                suffix = "s"
+            )
+        }
 
-        // Save Mock HA Data
-        SettingsSwitch(
-            title = "Save mock HA data",
-            description = "Save the last Home Assistant data locally for testing",
-            pref = Settings::saveMockHaData
-        )
+        item {
+            SettingsSwitch(
+                title = "Save mock HA data",
+                description = "Save the last Home Assistant data locally for testing",
+                pref = Settings::saveMockHaData
+            )
+        }
 
-        // Use Mock HA Data
-        SettingsSwitch(
-            title = "Use mock HA data",
-            description = "Use saved Home Assistant data instead of the network",
-            pref = Settings::useMockHaData
-        )
+        item {
+            SettingsSwitch(
+                title = "Use mock HA data",
+                description = "Use saved Home Assistant data instead of the network",
+                pref = Settings::useMockHaData
+            )
+        }
+
+        item {
+            SettingsActionCard(
+                title = "Show Setup QR",
+                description = "Scan from another device to copy your setup",
+                onClick = {
+                    onEvent(UiEvent.NavigateTo(Screen.SetupQr))
+                }
+            )
+        }
     }
 }

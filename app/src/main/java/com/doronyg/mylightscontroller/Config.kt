@@ -1,7 +1,9 @@
 package com.doronyg.mylightscontroller
 
+import com.doronyg.mylightscontroller.Settings.stringPref
+
 object Config {
-    val HOME_ASSISTANT_URL: String get() = BuildConfig.HA_URL
-    val HOME_ASSISTANT_TOKEN: String get() = BuildConfig.HA_TOKEN
-    val PORCUPINE_API_KEY: String get() = BuildConfig.PORCUPINE_API_KEY
+    var HOME_ASSISTANT_URL by stringPref("HA_URL", BuildConfig.HA_URL)
+    var HOME_ASSISTANT_TOKEN by stringPref("HA_TOKEN", BuildConfig.HA_TOKEN)
+    var PORCUPINE_API_KEY by stringPref("PORCUPINE_API_KEY", BuildConfig.PORCUPINE_API_KEY)
 }
