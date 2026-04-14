@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
-val withHardCodedSecrets = true
+val withHardCodedSecrets = false
 
 android {
     namespace = "com.doronyg.mylightscontroller"
@@ -25,7 +25,6 @@ android {
             "String",
             "HA_URL",
             if (withHardCodedSecrets) "\"${System.getenv("HA_URL") ?: ""}\"" else "\"\""
-
         )
         buildConfigField(
             "String",
@@ -96,6 +95,16 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
 
     implementation("com.google.zxing:javase:3.5.4")
+
+    // CameraX
+    implementation("androidx.camera:camera-core:1.6.0")
+    implementation("androidx.camera:camera-camera2:1.6.0")
+    implementation("androidx.camera:camera-lifecycle:1.6.0")
+    implementation("androidx.camera:camera-view:1.6.0")
+    implementation("com.google.guava:guava:31.1-android")
+
+    // ML Kit QR scanning
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

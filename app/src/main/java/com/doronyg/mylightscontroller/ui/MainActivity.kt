@@ -10,6 +10,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.R
+import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.onboarding.models.HaSetupPayload.Companion.parseSetupDeepLinkSafe
 import com.doronyg.mylightscontroller.services.VoiceControllerService
 import com.doronyg.mylightscontroller.utils.Utils
@@ -48,15 +49,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleDeepLink(intent: Intent?) {
-        val data = intent?.data?.toString() ?: return
-
-        parseSetupDeepLinkSafe(data)?.apply {
-            Config.HOME_ASSISTANT_URL = haUrl
-            Config.HOME_ASSISTANT_TOKEN = haUrl
-            porcupineKey?.let {
-                Config.PORCUPINE_API_KEY = it
+        Utils.post( {
+            intent?.data?.toString()?.let {
+                parseSetupDeepLinkSafe(it)?.apply {
+                    Config.homeAssistantUrl = haUrl
+                    Config.homeAssistantToken = haToken
+                    porcupineKey?.let {
+                        Config.porcupineApiKey = it
+                    }
+                    Settings.isConfigured = true
+                }
             }
-        }
+        })
     }
 
 }

@@ -62,4 +62,7 @@ object Settings {
     var secondsForHaUpdateOnUi by intPref("SECONDS_FOR_HA_UPDATE_ON_UI", 30)
     var saveMockHaData by booleanPref("SAVE_MOCK_HA_DATA")
     var useMockHaData by booleanPref("USE_MOCK_HA_DATA")
+    var isConfigured by booleanPref("IS_CONFIGURED", !Config.homeAssistantUrl.isEmpty())
+
+    fun withMockData() = useMockHaData || !isConfigured
 }

@@ -159,7 +159,7 @@ class VoiceControllerService : Service() {
     private fun initPorcupine() {
         try {
             porcupineManager = porcupineManager ?: PorcupineManager.Builder()
-                .setAccessKey(Config.PORCUPINE_API_KEY)
+                .setAccessKey(Config.porcupineApiKey)
                 .setKeyword(Porcupine.BuiltInKeyword.BUMBLEBEE)
                 .setSensitivity(0.5f)
                 .setErrorCallback { error -> Utils.log("PorcupineException: ${error?.message}") }

@@ -65,7 +65,5 @@ fun SetupQrScreen(
         Spacer(Modifier.height(16.dp))
 
         Text("Scan this QR from another device to copy your setup.")
-
-        Spacer(Modifier.height(16.dp))
     }
 }

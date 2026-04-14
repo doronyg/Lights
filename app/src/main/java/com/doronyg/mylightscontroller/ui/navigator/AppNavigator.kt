@@ -1,4 +1,4 @@
-package com.doronyg.mylightscontroller.ui.Navigator
+package com.doronyg.mylightscontroller.ui.navigator
 
 import androidx.compose.runtime.mutableStateListOf
 
@@ -14,6 +14,8 @@ class AppNavigator {
         when (event) {
             is UiEvent.NavigateTo -> push(event.screen)
             UiEvent.NavigateBack -> pop()
+            is UiEvent.Replace -> replace(event.screen)
+            is UiEvent.SetRoot -> setRoot(event.screen)
         }
     }
 
@@ -24,6 +26,14 @@ class AppNavigator {
     private fun pop() {
         if (_stack.size > 1) {
             _stack.removeAt(_stack.lastIndex)
+        }
+    }
+
+    private fun replace(screen: Screen) {
+        if (_stack.isNotEmpty()) {
+            _stack[_stack.lastIndex] = screen
+        } else {
+            _stack.add(screen)
         }
     }
 

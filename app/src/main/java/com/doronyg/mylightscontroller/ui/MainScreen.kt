@@ -24,10 +24,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
 import com.doronyg.mylightscontroller.Config
+import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.onboarding.models.AppConfig
-import com.doronyg.mylightscontroller.ui.Navigator.AppNavigator
-import com.doronyg.mylightscontroller.ui.Navigator.Screen
-import com.doronyg.mylightscontroller.ui.Navigator.UiEvent
+import com.doronyg.mylightscontroller.onboarding.ui.ManualSetupScreen
+import com.doronyg.mylightscontroller.onboarding.ui.OnboardingScreen
+import com.doronyg.mylightscontroller.ui.navigator.AppNavigator
+import com.doronyg.mylightscontroller.ui.navigator.Screen
+import com.doronyg.mylightscontroller.ui.navigator.UiEvent
+import com.doronyg.mylightscontroller.ui.navigator.UiEvent.*
 
 // --- Tabs ---
 enum class BottomTab(val title: String, val icon: ImageVector) {
@@ -53,9 +57,7 @@ fun MainScreen(
 
     // initialize root once
     LaunchedEffect(Unit) {
-        if (navigator.current == null) {
-            navigator.setRoot(Screen.Tab(BottomTab.Main))
-        }
+        navigator.setRoot(if (Settings.isConfigured) Screen.Tab(BottomTab.Main) else Screen.Onboarding)
     }
 
     val current = navigator.current ?: Screen.Tab(BottomTab.Main)
@@ -122,6 +124,31 @@ fun MainScreen(
                         }
                     )
                 }
+
+                Screen.Onboarding -> {
+                    OnboardingScreen(
+                        onManualSetup = {
+                            navigator.handle(NavigateTo(Screen.ManualSetup))
+                        },
+                        onSetupComplete = {
+                            navigator.handle(Replace(Screen.Tab(BottomTab.Main)))
+                        },
+                        onClose = {
+                            navigator.handle(NavigateBack)
+                        }
+                    )
+                }
+
+                Screen.ManualSetup -> {
+                    ManualSetupScreen(
+                        onSave = {
+                            navigator.handle(SetRoot(Screen.Tab(BottomTab.Main)))
+                        },
+                        onBack = {
+                            navigator.handle(NavigateBack)
+                        }
+                    )
+                }
             }
         }
     }
@@ -129,8 +156,8 @@ fun MainScreen(
 
 private fun buildAppConfig(): AppConfig {
     return AppConfig(
-        homeAssistantUrl = Config.HOME_ASSISTANT_URL,
-        homeAssistantToken = Config.HOME_ASSISTANT_TOKEN,
-        porcupineApiKey = Config.PORCUPINE_API_KEY
+        homeAssistantUrl = Config.homeAssistantUrl,
+        homeAssistantToken = Config.homeAssistantToken,
+        porcupineApiKey = Config.porcupineApiKey
     )
 }

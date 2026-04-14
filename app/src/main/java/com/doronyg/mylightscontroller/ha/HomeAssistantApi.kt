@@ -150,8 +150,8 @@ object HomeAssistantApi : HomeAssistantInterface {
         bodyJson: String? = null
     ): Request {
         val builder = Request.Builder()
-            .url("${Config.HOME_ASSISTANT_URL}/api/$endpoint")
-            .addHeader("Authorization", "Bearer ${Config.HOME_ASSISTANT_TOKEN}")
+            .url("${Config.homeAssistantUrl}/api/$endpoint")
+            .addHeader("Authorization", "Bearer ${Config.homeAssistantToken}")
             .addHeader("Content-Type", APPLICATION_JSON)
 
         if (method.uppercase() == HttpMethod.POST && bodyJson != null) {

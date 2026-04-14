@@ -13,8 +13,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.services.VoiceControllerService
-import com.doronyg.mylightscontroller.ui.Navigator.Screen
-import com.doronyg.mylightscontroller.ui.Navigator.UiEvent
+import com.doronyg.mylightscontroller.ui.navigator.Screen
+import com.doronyg.mylightscontroller.ui.navigator.UiEvent
 
 @Composable
 fun SettingsScreen(

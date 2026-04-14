@@ -27,7 +27,7 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private var api: HomeAssistantInterface =
-        if (Settings.useMockHaData) HomeAssistantApiMock
+        if (Settings.withMockData()) HomeAssistantApiMock
         else HomeAssistantApi
 
     private val apiListener = object : HomeAssistantInterface.Listener {
@@ -42,7 +42,7 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
 
     // Switch API if setting changed
     private fun ensureCorrectApi() {
-        val shouldUseMock = Settings.useMockHaData
+        val shouldUseMock = Settings.withMockData()
         val newApi =
             if (shouldUseMock) HomeAssistantApiMock
             else HomeAssistantApi
