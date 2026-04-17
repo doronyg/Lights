@@ -1,0 +1,136 @@
+[
+  {
+    "attributes": {
+      "friendly_name": "Sump Pump",
+      "supported_features": 0
+    },
+    "entity_id": "switch.tp_link_smart_plug_e209_outdoor_sump_pump",
+    "state": "unavailable"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Backyard Lights",
+      "supported_features": 0
+    },
+    "entity_id": "switch.tp_link_smart_plug_e209_outdoor_plug_two",
+    "state": "unavailable"
+  },
+  {
+    "attributes": {
+      "brightness": 124,
+      "friendly_name": "Kitchen",
+      "supported_color_modes": [
+        "brightness"
+      ],
+      "supported_features": 0
+    },
+    "entity_id": "light.kitchen",
+    "state": "on"
+  },
+  {
+    "attributes": {
+      "brightness": 255,
+      "friendly_name": "Dining",
+      "supported_color_modes": [
+        "brightness"
+      ],
+      "supported_features": 0
+    },
+    "entity_id": "light.dining",
+    "state": "on"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Porch",
+      "supported_features": 0
+    },
+    "entity_id": "switch.porch",
+    "state": "off"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Playroom",
+      "supported_features": 0
+    },
+    "entity_id": "switch.play_room",
+    "state": "unavailable"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Basement Washroom",
+      "supported_features": 0
+    },
+    "entity_id": "switch.basement_washroom",
+    "state": "off"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Basement",
+      "supported_color_modes": [
+        "brightness"
+      ],
+      "supported_features": 0
+    },
+    "entity_id": "light.basement",
+    "state": "off"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Lamp",
+      "supported_features": 0
+    },
+    "entity_id": "switch.lamp",
+    "state": "off"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Master Bedroom",
+      "supported_features": 0
+    },
+    "entity_id": "switch.master_bedroom",
+    "state": "on"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Bathroom",
+      "supported_color_modes": [
+        "brightness"
+      ],
+      "supported_features": 0
+    },
+    "entity_id": "light.bathroom",
+    "state": "off"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Children\u0027s Bedroom",
+      "supported_features": 0
+    },
+    "entity_id": "switch.childrens_bedroom",
+    "state": "unavailable"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Living",
+      "supported_features": 0
+    },
+    "entity_id": "switch.living",
+    "state": "off"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Mud Room",
+      "supported_features": 0
+    },
+    "entity_id": "switch.mud_room",
+    "state": "off"
+  },
+  {
+    "attributes": {
+      "friendly_name": "Plug",
+      "supported_features": 0
+    },
+    "entity_id": "switch.plug",
+    "state": "unavailable"
+  }
+]

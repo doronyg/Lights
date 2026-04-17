@@ -13,8 +13,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.Settings
+import com.doronyg.mylightscontroller.ha.mock.HomeAssistantApiMock
 import com.doronyg.mylightscontroller.ui.SettingsActionCard
 import com.doronyg.mylightscontroller.ui.SimpleTopBar
+import com.doronyg.mylightscontroller.utils.MockUtils
+import com.doronyg.mylightscontroller.utils.Utils
 
 @Composable
 fun OnboardingScreen(
@@ -75,4 +78,10 @@ fun applyDemoConfig() {
 
     Settings.useMockHaData = true
     Settings.isConfigured = true
+    Settings.saveMockHaData = true
+
+    Utils.appContext?.let {
+        HomeAssistantApiMock.populateMockData(MockUtils.loadMockDevices(it))
+    }
+
 }

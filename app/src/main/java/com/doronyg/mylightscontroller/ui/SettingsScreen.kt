@@ -11,10 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.doronyg.mylightscontroller.BuildConfig
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.services.VoiceControllerService
 import com.doronyg.mylightscontroller.ui.navigator.Screen
 import com.doronyg.mylightscontroller.ui.navigator.UiEvent
+import com.doronyg.mylightscontroller.utils.MockUtils.saveMockData
 
 @Composable
 fun SettingsScreen(
@@ -88,6 +90,18 @@ fun SettingsScreen(
                     onEvent(UiEvent.NavigateTo(Screen.SetupQr))
                 }
             )
+        }
+
+        if (BuildConfig.DEBUG) {
+            item {
+                SettingsActionCard(
+                    title = "Export HA data (debug)",
+                    description = "Write lights JSON to cache",
+                    onClick = {
+                        saveMockData(context.applicationContext)
+                    }
+                )
+            }
         }
     }
 }
