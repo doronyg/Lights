@@ -25,7 +25,7 @@ object Utils {
     var handler : Handler? = null
 
     fun log(string: String) {
-        Log.i("VoiceControl", string)
+        Log.i("LightsLog", string)
     }
 
     fun logException(e: Throwable, message : String? = null) {

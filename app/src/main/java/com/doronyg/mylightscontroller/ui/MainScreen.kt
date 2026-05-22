@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.Settings
@@ -33,6 +34,7 @@ import com.doronyg.mylightscontroller.ui.navigator.AppNavigator
 import com.doronyg.mylightscontroller.ui.navigator.Screen
 import com.doronyg.mylightscontroller.ui.navigator.UiEvent
 import com.doronyg.mylightscontroller.ui.navigator.UiEvent.*
+import com.doronyg.mylightscontroller.utils.AppTranslator
 
 // --- Tabs ---
 enum class BottomTab(val title: String, val icon: ImageVector) {
@@ -43,17 +45,19 @@ enum class BottomTab(val title: String, val icon: ImageVector) {
 
 @Composable
 fun MainScreen(
-    viewModel: DevicesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    devicesViewModel: DevicesViewModel = viewModel(),
+    translatorViewModel: TranslatorViewModel = viewModel()
 ) {
-    val devices by viewModel.devices.collectAsState()
-    val loading by viewModel.loading.collectAsState()
+    val devices by devicesViewModel.devices.collectAsState()
+    val loading by devicesViewModel.loading.collectAsState()
+    val translatorReady by translatorViewModel.ready.collectAsState()
 
     val navigator = remember { AppNavigator() }
 
     val canGoBack = navigator.stack.size > 1
 
     BackHandler(enabled = canGoBack) {
-        navigator.handle(UiEvent.NavigateBack)
+        navigator.handle(NavigateBack)
     }
 
     // initialize root once
@@ -71,17 +75,18 @@ fun MainScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            if (showBottomBar) {
+            if (showBottomBar && translatorReady) {
                 NavigationBar {
                     BottomTab.entries.forEach { tab ->
+                        val title = AppTranslator.cachedTranslation(tab.title)
                         NavigationBarItem(
                             selected = current.tab == tab,
                             onClick = {
                                 navigator.setRoot(Screen.Tab(tab))
                             },
-                            icon = { Icon(tab.icon, contentDescription = tab.title) },
+                            icon = { Icon(tab.icon, contentDescription = title) },
                             label = if (showLabels) {
-                                { Text(tab.title, maxLines = 1, softWrap = false) }
+                                { Text(title, maxLines = 1, softWrap = false) }
                             } else null
                         )
                     }
@@ -97,8 +102,9 @@ fun MainScreen(
                 .padding(12.dp)
         ) {
 
-            if (loading) {
+            if (loading || !translatorReady) {
                 Text("Loading...")
+                return@Scaffold
             }
 
             when (current) {
@@ -107,11 +113,11 @@ fun MainScreen(
                     when (current.tab) {
 
                         BottomTab.Main -> {
-                            DeviceGrid(devices.filter { !it.unavailable }, viewModel)
+                            DeviceGrid(devices.filter { !it.unavailable }, devicesViewModel)
                         }
 
                         BottomTab.Unavailable -> {
-                            DeviceGrid(devices.filter { it.unavailable }, viewModel)
+                            DeviceGrid(devices.filter { it.unavailable }, devicesViewModel)
                         }
 
                         BottomTab.Settings -> {

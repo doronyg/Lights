@@ -8,6 +8,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -85,15 +88,25 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
         ensureCorrectApi()
 
         api.fetchAllLights(refresh) { devices ->
+            CoroutineScope(Dispatchers.IO).launch {
+                // If using real API and saving is enabled → update mock storage
+                if (api === HomeAssistantApi && Settings.saveMockHaData) {
+                    HomeAssistantApiMock.populateMockData(devices)
+                }
 
-            // If using real API and saving is enabled → update mock storage
-            if (api === HomeAssistantApi && Settings.saveMockHaData) {
-                HomeAssistantApiMock.populateMockData(devices)
+                coroutineScope {
+                    devices.map { device ->
+                        async { device.translate() }
+                    }.awaitAll()
+                }
             }
 
-            onResult(devices)
-            if (refresh) {
-                notifyListeners()
+            CoroutineScope(Dispatchers.Main).launch {
+                onResult(devices)
+
+                if (refresh) {
+                    notifyListeners()
+                }
             }
         }
     }

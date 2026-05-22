@@ -295,10 +295,10 @@ class VoiceControllerService : Service() {
 
     private fun findDeviceByName(deviceName: String): HaDevice? =
         haLights.find {
-            it.attributes.friendlyName.equals(deviceName, true)
+            it.name.equals(deviceName, true)
         }.also { haDevice -> Utils.log("Found device $haDevice") }
 
     private fun haLightsNames() =
-        haLights.mapNotNull { it.attributes.friendlyName }
+        haLights.map { it.name }
 
 }

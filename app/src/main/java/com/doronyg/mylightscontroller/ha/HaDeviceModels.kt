@@ -1,5 +1,6 @@
 package com.doronyg.mylightscontroller.ha
 
+import com.doronyg.mylightscontroller.utils.AppTranslator
 import com.google.gson.annotations.SerializedName
 
 enum class DeviceType { LIGHT, SWITCH, OTHER }
@@ -21,6 +22,10 @@ data class HaDevice(
     @SerializedName("attributes") val attributes: HaAttributes,
 
 ) {
+    suspend fun translate() {
+        translatedName = attributes.friendlyName?.let { AppTranslator.translate(it ) }
+    }
+
     val type: DeviceType
         get() = when {
             entityId.startsWith("light.") -> DeviceType.LIGHT
@@ -29,7 +34,12 @@ data class HaDevice(
         }
 
     val name: String
+        get() = translatedName ?: attributes.friendlyName ?: entityId
+
+    val englishName: String
         get() = attributes.friendlyName ?: entityId
+
+    var translatedName : String? = null
 
     val area: String?
         get() = attributes.areaId

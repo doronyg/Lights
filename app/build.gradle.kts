@@ -105,6 +105,7 @@ dependencies {
 
     // ML Kit QR scanning
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
+    implementation("com.google.mlkit:translate:17.0.3")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

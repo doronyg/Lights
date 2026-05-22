@@ -111,7 +111,7 @@ object HaIconResolver {
             return Icons.Default.Devices
         }
 
-        val name = normalize(device.name)
+        val name = normalize(device.englishName)
 
         val bestMatch = rules
             .map { rule ->

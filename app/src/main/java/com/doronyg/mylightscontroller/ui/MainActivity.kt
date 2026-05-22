@@ -13,6 +13,7 @@ import com.doronyg.mylightscontroller.R
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.onboarding.models.HaSetupPayload.Companion.parseSetupDeepLinkSafe
 import com.doronyg.mylightscontroller.services.VoiceControllerService
+import com.doronyg.mylightscontroller.utils.AppTranslator
 import com.doronyg.mylightscontroller.utils.Utils
 
 class MainActivity : AppCompatActivity() {
@@ -30,6 +31,7 @@ class MainActivity : AppCompatActivity() {
 
         requestPermissions()
         VoiceControllerService.startService(this, false)
+        AppTranslator.init(this)
     }
 
     override fun onNewIntent(intent: Intent) {
