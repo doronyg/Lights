@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.ha.HaDevice
 
@@ -23,11 +24,21 @@ fun DeviceGrid(
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Responsive column count based on width
+        val fontScale = LocalConfiguration.current.fontScale
+
+        // Responsive column count based on width or font scale
         val columnCount = when {
-            maxWidth < 300.dp -> 1 // super narrow
-            maxWidth < 600.dp -> 2 // compact / small
-            else -> 3              // normal
+            // very small phones
+            maxWidth < 300.dp -> 1
+
+            // tablets always 3
+            maxWidth >= 600.dp -> 3
+
+            // phones: low font scale => 2 columns
+            fontScale < 1.3f -> 2
+
+            // phones: larger text => reduce density
+            else -> 1
         }
 
         val horizontalPadding = if (columnCount == 1) 4.dp else 8.dp
