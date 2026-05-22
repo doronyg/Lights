@@ -25,6 +25,7 @@ fun DeviceGrid(
         modifier = Modifier.fillMaxSize()
     ) {
         val fontScale = LocalConfiguration.current.fontScale
+        val accessibilityMode = fontScale >= 1.3f
 
         // Responsive column count based on width or font scale
         val columnCount = when {
@@ -34,11 +35,11 @@ fun DeviceGrid(
             // tablets always 3
             maxWidth >= 600.dp -> 3
 
-            // phones: low font scale => 2 columns
-            fontScale < 1.3f -> 2
+            // accessibilityMode forces 1 column
+            accessibilityMode -> 1
 
             // phones: larger text => reduce density
-            else -> 1
+            else -> 2
         }
 
         val horizontalPadding = if (columnCount == 1) 4.dp else 8.dp
