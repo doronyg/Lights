@@ -14,11 +14,12 @@ import androidx.compose.material.icons.filled.LocalLaundryService
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Router
-import androidx.compose.material.icons.filled.Stairs
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.ToggleOn
+import androidx.compose.material.icons.filled.Wc
 import androidx.compose.material.icons.filled.Weekend
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.doronyg.mylightscontroller.ui.icons.Basement
 
 object HaIconResolver {
 
@@ -31,7 +32,12 @@ object HaIconResolver {
 
         IconRule(
             Icons.Default.Bathtub,
-            listOf("bath", "washroom", "toilet", "restroom")
+            listOf("bath")
+        ),
+
+        IconRule(
+            Icons.Default.Wc,
+            listOf( "washroom", "toilet", "restroom")
         ),
 
         IconRule(
@@ -55,7 +61,7 @@ object HaIconResolver {
         ),
 
         IconRule(
-            Icons.Default.Stairs,
+            Basement,
             listOf("basement", "cellar", "stairs")
         ),
 
