@@ -133,8 +133,8 @@ object AppTranslator {
         texts.forEach { text ->
             val translated = suspendCancellableCoroutine<String> { cont ->
                 t.translate(text)
-                    .addOnSuccessListener { cont.resume(it) {} }
-                    .addOnFailureListener { cont.resume(text) {} }
+                    .addOnSuccessListener { cont.resume(it) { _, _, _ -> } }
+                    .addOnFailureListener { cont.resume(text) { _, _, _ -> } }
             }
             memoryCache[text] = translated
         }
@@ -147,7 +147,7 @@ object AppTranslator {
             .requireWifi()
             .build()
 
-        suspendCancellableCoroutine<Unit> { cont ->
+        suspendCancellableCoroutine { cont ->
             t.downloadModelIfNeeded(conditions)
                 .addOnSuccessListener { cont.resume(Unit) { _, _, _ -> } }
                 .addOnFailureListener { cont.resumeWithException(it) }

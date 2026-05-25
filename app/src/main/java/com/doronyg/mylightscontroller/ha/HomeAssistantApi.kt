@@ -71,7 +71,7 @@ object HomeAssistantApi : HomeAssistantInterface {
                         return
                     }
 
-                    val body = it.body?.string() ?: ""
+                    val body = it.body.string()
 
                     val devices: List<HaDevice> = gson.fromJson(body, typeTokenType)
 

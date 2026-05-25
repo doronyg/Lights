@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
 }
 
@@ -60,55 +59,52 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.3" // latest stable
     }
-
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
 }
 
 dependencies {
-    // Porcupine Picovoice SDK
-    implementation(libs.porcupine.android)
-    // Networking for REST calls
-    implementation(libs.okhttp)
-    implementation(libs.logging.interceptor)
 
-    implementation(libs.gson)
-
-    // Android imports
+    // ---------- Core Android ----------
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
 
+    // ---------- Compose ----------
+    implementation(platform(libs.androidx.compose.bom))
+
     implementation(libs.androidx.ui)
-    implementation(libs.androidx.foundation.layout)
-    implementation(libs.androidx.foundation)
-    implementation(libs.androidx.material3)
     implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.foundation)
+    implementation(libs.androidx.foundation.layout)
+    implementation(libs.androidx.material3)
 
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.material.icons.extended)
 
-    implementation("androidx.activity:activity-compose:1.13.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+    // ---------- Networking ----------
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.gson)
 
-    implementation("com.google.zxing:javase:3.5.4")
+    // ---------- CameraX ----------
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
 
-    // CameraX
-    implementation("androidx.camera:camera-core:1.6.0")
-    implementation("androidx.camera:camera-camera2:1.6.0")
-    implementation("androidx.camera:camera-lifecycle:1.6.0")
-    implementation("androidx.camera:camera-view:1.6.0")
-    implementation("com.google.guava:guava:31.1-android")
+    // ---------- ML Kit ----------
+    implementation(libs.mlkit.barcode)
+    implementation(libs.mlkit.translate)
 
-    // ML Kit QR scanning
-    implementation("com.google.mlkit:barcode-scanning:17.3.0")
-    implementation("com.google.mlkit:translate:17.0.3")
+    // ---------- Other ----------
+    implementation(libs.zxing)
+    implementation(libs.guava)
+    implementation(libs.porcupine.android)
 
+    // ---------- Tests ----------
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
 }

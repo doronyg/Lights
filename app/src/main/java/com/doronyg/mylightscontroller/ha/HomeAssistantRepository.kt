@@ -1,8 +1,7 @@
+package com.doronyg.mylightscontroller.ha
+
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.Settings.secondsForHaUpdateOnUi
-import com.doronyg.mylightscontroller.ha.HaDevice
-import com.doronyg.mylightscontroller.ha.HomeAssistantApi
-import com.doronyg.mylightscontroller.ha.HomeAssistantInterface
 import com.doronyg.mylightscontroller.ha.mock.HomeAssistantApiMock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

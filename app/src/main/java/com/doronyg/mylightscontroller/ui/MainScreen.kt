@@ -132,7 +132,7 @@ fun MainScreen(
                     SetupQrScreen(
                         config = buildAppConfig(),
                         onClose = {
-                            navigator.handle(UiEvent.NavigateBack)
+                            navigator.handle(NavigateBack)
                         }
                     )
                 }

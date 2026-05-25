@@ -56,8 +56,8 @@ class MainActivity : AppCompatActivity() {
                 parseSetupDeepLinkSafe(it)?.apply {
                     Config.homeAssistantUrl = haUrl
                     Config.homeAssistantToken = haToken
-                    porcupineKey?.let {
-                        Config.porcupineApiKey = it
+                    porcupineKey?.let { porcupineKey ->
+                        Config.porcupineApiKey = porcupineKey
                     }
                     Settings.isConfigured = true
                 }

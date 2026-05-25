@@ -2,6 +2,7 @@ package com.doronyg.mylightscontroller.utils
 
 import android.content.Context
 import com.doronyg.mylightscontroller.ha.HaDevice
+import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder

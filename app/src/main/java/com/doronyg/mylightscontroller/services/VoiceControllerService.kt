@@ -1,6 +1,6 @@
 package com.doronyg.mylightscontroller.services
 
-import HomeAssistantRepository
+import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
 import ai.picovoice.porcupine.Porcupine
 import ai.picovoice.porcupine.PorcupineManager
 import android.annotation.SuppressLint
