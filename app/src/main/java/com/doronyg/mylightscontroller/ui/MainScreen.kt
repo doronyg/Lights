@@ -2,6 +2,7 @@ package com.doronyg.mylightscontroller.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -32,7 +33,6 @@ import com.doronyg.mylightscontroller.onboarding.ui.ManualSetupScreen
 import com.doronyg.mylightscontroller.onboarding.ui.OnboardingScreen
 import com.doronyg.mylightscontroller.ui.navigator.AppNavigator
 import com.doronyg.mylightscontroller.ui.navigator.Screen
-import com.doronyg.mylightscontroller.ui.navigator.UiEvent
 import com.doronyg.mylightscontroller.ui.navigator.UiEvent.*
 import com.doronyg.mylightscontroller.utils.AppTranslator
 
@@ -76,7 +76,7 @@ fun MainScreen(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             if (showBottomBar && translatorReady) {
-                NavigationBar {
+                NavigationBar (windowInsets = WindowInsets()) {
                     BottomTab.entries.forEach { tab ->
                         val title = AppTranslator.cachedTranslation(tab.title)
                         NavigationBarItem(
