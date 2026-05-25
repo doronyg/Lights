@@ -5,10 +5,26 @@ plugins {
 
 val withHardCodedSecrets = false
 
+fun env(name: String): String =
+    System.getenv(name) ?: ""
+
 android {
     namespace = "com.doronyg.mylightscontroller"
     compileSdk {
         version = release(36)
+    }
+
+    signingConfigs {
+        create("release") {
+            val storeFilePath = env("RELEASE_STORE_FILE")
+
+            if (storeFilePath != "") {
+                storeFile = file(env("RELEASE_STORE_FILE"))
+                storePassword = env("RELEASE_STORE_PASSWORD")
+                keyAlias = env("RELEASE_KEY_ALIAS")
+                keyPassword = env("RELEASE_KEY_PASSWORD")
+            }
+        }
     }
 
     defaultConfig {
@@ -44,6 +60,7 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
