@@ -1,29 +1,47 @@
-# LightsController
+# Lights Controller
 
-An Android app to control Home Assistant devices via voice commands. 
-
-## Supports:
-
-- Hotword detection and voice command parsing
-- Turning devices on/off
-- Adjusting brightness (dim/brighten)
-- Stop/cancel commands
-- Integration with Home Assistant API
+An Android app for controlling Home Assistant lights and devices using a modern touch UI and optional voice commands.
+Built with Kotlin and Jetpack Compose.
 
 ## Features
 
-- Foreground service keeps listening for voice commands
-- CommandParser handles intent, device, and brightness extraction
-- Kotlin + Jetpack Compose UI for device control
-- Configurable via build-time constants (not committed to source control)
-- Modular design: `services`, `ha`, `ui`, `utils` packages
+- Device control UI with responsive grid layout
+- Accessibility-aware layouts for larger system font sizes
+- Voice command support with hotword detection
+- Turn devices on/off
+- Adjust brightness (dim/brighten)
+- Stop/cancel voice commands
+- Home Assistant API integration
+- Onboarding flow for configuring:
+  - Home Assistant URL
+  - Home Assistant access token
+  - Voice service keys
+- Runtime translation support using on-device ML Kit translation
+- Translation preload/cache system for synchronous UI rendering
+- Foreground voice service for continuous listening
+- Responsive layouts for phones and tablets
+- Modular architecture with separated packages:
+  - `ha`
+  - `services`
+  - `ui`
+  - `utils`
+  - `onboarding`
 
-## Setup
-1) Clone repo
-2) Add system environment variables that will be used to populate the configuration - HA_URL, HA_TOKEN, PORCUPINE_API_KEY
-3) Open the project in Android Studio and build.
+## Technical Details
+
+- Kotlin
+- Jetpack Compose
+- Coroutines + StateFlow
+- Google ML Kit Translation
+- Home Assistant REST API
+- Material 3 UI
+
+## Notes
+
+- Configuration secrets are supplied locally and are not committed to source control.
+- Translation support is best-effort and performed on-device.
 
 ## License
 
-© 2026 Doron Yakovlev Golani. All rights reserved.  
+© 2026 Doron Yakovlev Golani. All rights reserved.
 This software is private and may not be copied, modified, distributed, or used for any purpose without explicit permission from the author.
