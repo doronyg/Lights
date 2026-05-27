@@ -40,7 +40,6 @@ fun SettingsIntSlider(
             .fillMaxWidth()
             .padding(bottom = 8.dp),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
