@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,7 +38,7 @@ fun ManualSetupScreen(
 
     var hasSubmitted by remember { mutableStateOf(false) }
 
-    val (accentColor, _) = lightOnColors()
+    val (_, accentColor) = lightOnColors()
 
     // ----------------------------
     // Validation functions
@@ -106,39 +109,52 @@ fun ManualSetupScreen(
         Spacer(Modifier.height(16.dp))
 
         // URL
-        SettingsTextField(
-            value = url,
-            onValueChange = { url = it.trim() },
-            label = "Home Assistant URL",
-            accentColor = accentColor,
-            error = urlError,
-            modifier = Modifier.fillMaxWidth()
-        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
 
-        Spacer(Modifier.height(12.dp))
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
 
-        // Token
-        SettingsTextField(
-            value = token,
-            onValueChange = { token = it.trim() },
-            label = "Access Token",
-            accentColor = accentColor,
-            error = tokenError,
-            secure = true,
-            modifier = Modifier.fillMaxWidth()
-        )
+                SettingsTextField(
+                    value = url,
+                    onValueChange = { url = it.trim() },
+                    label = "Home Assistant URL",
+                    accentColor = accentColor,
+                    error = urlError,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-        Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(12.dp))
 
-        // Porcupine
-        SettingsTextField(
-            value = porcupineKey,
-            onValueChange = { porcupineKey = it.trim() },
-            label = "Porcupine API Key (optional)",
-            accentColor = accentColor,
-            error = porcupineError,
-            modifier = Modifier.fillMaxWidth()
-        )
+                // Token
+                SettingsTextField(
+                    value = token,
+                    onValueChange = { token = it.trim() },
+                    label = "Access Token",
+                    accentColor = accentColor,
+                    error = tokenError,
+                    secure = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                // Porcupine
+                SettingsTextField(
+                    value = porcupineKey,
+                    onValueChange = { porcupineKey = it.trim() },
+                    label = "Porcupine API Key (optional)",
+                    accentColor = accentColor,
+                    error = porcupineError,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
 
         Spacer(Modifier.height(24.dp))
 
