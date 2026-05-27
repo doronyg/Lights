@@ -13,14 +13,28 @@ import java.io.File
 
 object MockUtils {
 
-    fun saveMockData(appContext: Context) {
+    private fun dispatchToMain(
+        onResult: ((File?) -> Unit)?,
+        result: File?
+    ) {
+        if (onResult == null) return
+
+        CoroutineScope(Dispatchers.Main).launch {
+            onResult(result)
+        }
+    }
+
+    fun saveMockData(
+        appContext: Context,
+        onResult: ((File?) -> Unit)? = null
+    ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 HomeAssistantRepository.instance.fetchAllLights(
                     refresh = true
                 ) { lights ->
 
-                    try {
+                    val resultFile: File? = try {
                         val json = GsonBuilder()
                             .setPrettyPrinting()
                             .create()
@@ -30,15 +44,20 @@ object MockUtils {
                         file.writeText(json)
 
                         Utils.log("HA export written to: ${file.absolutePath}")
+                        file
                     } catch (e: Exception) {
                         Utils.logException(e, "Failed to write HA data")
+                        null
                     }
+                    dispatchToMain(onResult, resultFile)
                 }
             } catch (e: Exception) {
                 Utils.logException(e, "Failed to fetch HA data")
+                dispatchToMain(onResult, null)
             }
         }
     }
+
 
     fun loadMockDevices(context: Context): List<HaDevice> {
         return try {

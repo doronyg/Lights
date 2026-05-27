@@ -16,6 +16,7 @@ import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.services.VoiceControllerService
 import com.doronyg.mylightscontroller.ui.navigator.Screen
 import com.doronyg.mylightscontroller.ui.navigator.UiEvent
+import com.doronyg.mylightscontroller.utils.EmailHelper
 import com.doronyg.mylightscontroller.utils.MockUtils.saveMockData
 
 @Composable
@@ -88,6 +89,16 @@ fun SettingsScreen(
                 description = "Scan from another device to copy your setup",
                 onClick = {
                     onEvent(UiEvent.NavigateTo(Screen.SetupQr))
+                }
+            )
+        }
+
+        item {
+            SettingsActionCard(
+                title = "Export data via email",
+                description = "Export lights JSON and send via email",
+                onClick = {
+                    EmailHelper.sendHaDataViaEmail(context.applicationContext)
                 }
             )
         }

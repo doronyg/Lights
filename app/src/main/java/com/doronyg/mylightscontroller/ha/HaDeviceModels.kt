@@ -10,7 +10,13 @@ data class HaAttributes(
     @SerializedName("area_id") val areaId: String?,
     @SerializedName("supported_features") val supportedFeatures: Int = 0,
     @SerializedName("supported_color_modes") val supportedColorModes: List<String>? = null,
-    @SerializedName("brightness") val brightness: Int? = null
+    @SerializedName("brightness") val brightness: Int? = null,
+    @SerializedName("color_mode") val colorMode: String? = null,
+    @SerializedName("rgb_color") val rgbColor: List<Int>? = null,
+    @SerializedName("hs_color") val hsColor: List<Float>? = null,
+    @SerializedName("xy_color") val xyColor: List<Float>? = null,
+    @SerializedName("color_temp") val colorTemp: Int? = null,
+    @SerializedName("color_temp_kelvin") val colorTempKelvin: Int? = null
 ) {
     val brightnessPct: Int?
         get() = brightness?.let { it * 100 / 255 } // 0..100%
