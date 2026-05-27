@@ -1,5 +1,6 @@
 package com.doronyg.mylightscontroller.onboarding.ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,7 +42,8 @@ fun ManualSetupScreen(
 
     var hasSubmitted by remember { mutableStateOf(false) }
 
-    val (_, accentColor) = lightOnColors()
+    val lightOnColors = lightOnColors()
+    val accentColor = if (isSystemInDarkTheme()) lightOnColors.first else lightOnColors.second
 
     // ----------------------------
     // Validation functions
