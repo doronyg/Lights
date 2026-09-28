@@ -1,25 +1,10 @@
 package com.doronyg.mylightscontroller.ha
-import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.ha.HomeAssistantInterface.Listener
 import com.doronyg.mylightscontroller.utils.NetworkUtils
-import com.doronyg.mylightscontroller.utils.NetworkUtils.HttpMethod
 import com.doronyg.mylightscontroller.utils.Utils
-import com.doronyg.mylightscontroller.utils.Utils.APPLICATION_JSON
-import com.doronyg.mylightscontroller.utils.Utils.contentType
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import java.io.IOException
 import java.lang.ref.WeakReference
 
 object HomeAssistantApi : HomeAssistantInterface {
-
-    private val gson = Gson()
-    private val typeTokenType = object : TypeToken<List<HaDevice>>() {}.type
 
     private var haLights : List<HaDevice> = emptyList()
 
@@ -55,31 +40,22 @@ object HomeAssistantApi : HomeAssistantInterface {
             return
         }
 
-        val request = buildHaRequest("states")
-
-        NetworkUtils.okHttpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Utils.log("HomeAssistantApi Failed to fetch states $e")
+        NetworkUtils.asyncHaGet<List<HaDevice>>(
+            endpoint = "states",
+            onResult = { devices ->
+                // only keep lights & switches
+                val filteredDevices = devices.filter { haDevice ->
+                    (haDevice.type == DeviceType.LIGHT || haDevice.type == DeviceType.SWITCH)
+                }
+                haLights = filteredDevices
+                onResult(filteredDevices)
+            },
+            onError = { e ->
+                Utils.log("HomeAssistantApi Failed to fetch states")
+                Utils.logException(e)
                 onResult(emptyList())
             }
-
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!it.isSuccessful) {
-                        Utils.log("HomeAssistantApiUnexpected response: ${it.code}")
-                        onResult(emptyList())
-                        return
-                    }
-
-                    val body = it.body.string()
-
-                    val devices: List<HaDevice> = gson.fromJson(body, typeTokenType)
-
-                    // only keep lights & switches
-                    onResult(devices.filter { haDevice -> (haDevice.type == DeviceType.LIGHT || haDevice.type == DeviceType.SWITCH) })
-                }
-            }
-        })
+        )
     }
 
     // Turn on lights
@@ -94,7 +70,8 @@ object HomeAssistantApi : HomeAssistantInterface {
 
         if (switches.isNotEmpty()) {
             val switchIds = switches.map { it.entityId }
-            val switchCommand = HaLightCommand(switchIds) // brightness ignored
+            // brightness ignored
+            val switchCommand = HaLightCommand(switchIds)
             postCommand("switch/turn_on", switchCommand)
         }
     }
@@ -124,41 +101,18 @@ object HomeAssistantApi : HomeAssistantInterface {
 
     // Generic POST helper
     private fun postCommand(endpoint: String, command: HaLightCommand) {
-        val request = buildHaRequest(
-            endpoint = "services/$endpoint",
-            method = "POST",
-            bodyJson = gson.toJson(command)
-        )
-
-        NetworkUtils.okHttpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Utils.log("HomeAssistantApi Failed to POST $endpoint $e")
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                Utils.log("HomeAssistantApi $endpoint response: ${response.code}")
+        NetworkUtils.asyncHaPost(
+            endpoint = endpoint,
+            body = command,
+            onSuccess = {
+                Utils.log("HomeAssistantApi $endpoint response: success")
                 listeners.forEach { it.get()?.onUpdate() }
-                response.close()
+            },
+            onError = { e ->
+                Utils.log("HomeAssistantApi Failed to POST $endpoint")
+                Utils.logException(e)
             }
-        })
-    }
-
-    // Helper to build a request with HA headers
-    fun buildHaRequest(
-        endpoint: String,
-        method: String = HttpMethod.GET,
-        bodyJson: String? = null
-    ): Request {
-        val builder = Request.Builder()
-            .url("${Config.homeAssistantUrl}/api/$endpoint")
-            .addHeader("Authorization", "Bearer ${Config.homeAssistantToken}")
-            .addHeader("Content-Type", APPLICATION_JSON)
-
-        if (method.uppercase() == HttpMethod.POST && bodyJson != null) {
-            val requestBody = bodyJson.toRequestBody(contentType)
-            builder.post(requestBody)
-        }
-
-        return builder.build()
+        )
     }
 }
+

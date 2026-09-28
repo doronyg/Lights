@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 val withHardCodedSecrets = false
@@ -101,9 +102,14 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
 
     // ---------- Networking ----------
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging)
-    implementation(libs.gson)
+    // Ktor Client
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.json)
+
+    // kotlinx.serialization
+    implementation(libs.kotlinx.serialization.json)
 
     // ---------- CameraX ----------
     implementation(libs.androidx.camera.core)

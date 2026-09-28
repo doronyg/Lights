@@ -1,31 +1,34 @@
 package com.doronyg.mylightscontroller.ha
 
 import com.doronyg.mylightscontroller.utils.AppTranslator
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 enum class DeviceType { LIGHT, SWITCH, OTHER }
 
+@Serializable
 data class HaAttributes(
-    @SerializedName("friendly_name") val friendlyName: String?,
-    @SerializedName("area_id") val areaId: String?,
-    @SerializedName("supported_features") val supportedFeatures: Int = 0,
-    @SerializedName("supported_color_modes") val supportedColorModes: List<String>? = null,
-    @SerializedName("brightness") val brightness: Int? = null,
-    @SerializedName("color_mode") val colorMode: String? = null,
-    @SerializedName("rgb_color") val rgbColor: List<Int>? = null,
-    @SerializedName("hs_color") val hsColor: List<Float>? = null,
-    @SerializedName("xy_color") val xyColor: List<Float>? = null,
-    @SerializedName("color_temp") val colorTemp: Int? = null,
-    @SerializedName("color_temp_kelvin") val colorTempKelvin: Int? = null
+    @SerialName("friendly_name") val friendlyName: String? = null,
+    @SerialName("area_id") val areaId: String? = null,
+    @SerialName("supported_features") val supportedFeatures: Int = 0,
+    @SerialName("supported_color_modes") val supportedColorModes: List<String>? = null,
+    @SerialName("brightness") val brightness: Int? = null,
+    @SerialName("color_mode") val colorMode: String? = null,
+    @SerialName("rgb_color") val rgbColor: List<Int>? = null,
+    @SerialName("hs_color") val hsColor: List<Float>? = null,
+    @SerialName("xy_color") val xyColor: List<Float>? = null,
+    @SerialName("color_temp") val colorTemp: Int? = null,
+    @SerialName("color_temp_kelvin") val colorTempKelvin: Int? = null
 ) {
     val brightnessPct: Int?
         get() = brightness?.let { it * 100 / 255 } // 0..100%
 }
 
+@Serializable
 data class HaDevice(
-    @SerializedName("entity_id") val entityId: String,
-    @SerializedName("state") val state: String,
-    @SerializedName("attributes") val attributes: HaAttributes,
+    @SerialName("entity_id") val entityId: String,
+    @SerialName("state") val state: String,
+    @SerialName("attributes") val attributes: HaAttributes,
 
 ) {
     suspend fun translate() {
@@ -68,7 +71,8 @@ data class HaDevice(
 }
 
 
+@Serializable
 data class HaLightCommand(
-    @SerializedName("entity_id") val entityId: List<String>,
-    @SerializedName("brightness_pct") val brightnessPct: Int? = null
+    @SerialName("entity_id") val entityId: List<String>,
+    @SerialName("brightness_pct") val brightnessPct: Int? = null
 )

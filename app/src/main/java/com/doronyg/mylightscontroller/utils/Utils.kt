@@ -6,11 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.util.Log
 import androidx.core.content.ContextCompat
-import okhttp3.MediaType.Companion.toMediaType
 
 object Utils {
-    const val APPLICATION_JSON = "application/json"
-    val contentType = APPLICATION_JSON.toMediaType()
 
     var appContext: Context? = null
         set(value) {

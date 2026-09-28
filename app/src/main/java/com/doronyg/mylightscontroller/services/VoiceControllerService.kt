@@ -1,6 +1,5 @@
 package com.doronyg.mylightscontroller.services
 
-import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
 import ai.picovoice.porcupine.Porcupine
 import ai.picovoice.porcupine.PorcupineManager
 import android.annotation.SuppressLint
@@ -31,6 +30,7 @@ import com.doronyg.mylightscontroller.commands.ParsedVoiceOutput
 import com.doronyg.mylightscontroller.commands.VoiceCommand
 import com.doronyg.mylightscontroller.ha.DeviceType
 import com.doronyg.mylightscontroller.ha.HaDevice
+import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
 import com.doronyg.mylightscontroller.ui.MainActivity
 import com.doronyg.mylightscontroller.utils.Utils
 

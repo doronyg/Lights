@@ -1,10 +1,10 @@
 package com.doronyg.mylightscontroller.ui
 
-import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HomeAssistantInterface
+import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
 import com.doronyg.mylightscontroller.utils.Utils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
