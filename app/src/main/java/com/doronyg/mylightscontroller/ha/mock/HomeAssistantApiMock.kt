@@ -1,6 +1,7 @@
 package com.doronyg.mylightscontroller.ha.mock
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HomeAssistantInterface
@@ -35,7 +36,8 @@ object HomeAssistantApiMock : HomeAssistantInterface {
         if (!Settings.saveMockHaData) return
         try {
             val jsonString = JsonUtils.json.encodeToString(devices)
-            prefs?.edit()?.putString(MOCK_DATA_KEY, jsonString)?.apply()
+            prefs?.edit { putString(MOCK_DATA_KEY, jsonString)?.apply() }
+            Utils.log("Saved mock devices: $jsonString")
         } catch (e: Exception) {
             Utils.log("Failed to serialize mock devices: $e")
             Utils.logException(e)

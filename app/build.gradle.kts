@@ -36,6 +36,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Pass arguments to disable isolated storage during test execution
+        testInstrumentationRunnerArguments += mapOf(
+            "useTestStorageService" to "true",
+            "no-isolated-storage" to "true",
+            "clearPackageData" to "false"
+        )
+
         android.buildFeatures.buildConfig = true
         buildConfigField(
             "String",
@@ -126,8 +133,15 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.porcupine.android)
 
-    // ---------- Tests ----------
+    // ---------- Unit & Instrumentation Tests ----------
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Activity testing (ActivityScenario for UI tests)
+    androidTestImplementation("androidx.test:core:1.5.0")
+    androidTestImplementation("androidx.test.services:test-services:1.4.2")
+
+    // Test activity hosting runner (allows launching activities in UI tests)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
