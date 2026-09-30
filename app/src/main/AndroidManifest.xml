@@ -42,10 +42,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".onboarding.ui.QrScanActivity"
-            android:exported="false"/>
-
         <service
             android:name=".services.VoiceControllerService"
             android:foregroundServiceType="microphone"

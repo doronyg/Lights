@@ -1,6 +1,5 @@
 package com.doronyg.mylightscontroller.onboarding.ui
 
-import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.Settings
@@ -23,10 +21,9 @@ import com.doronyg.mylightscontroller.utils.Utils
 fun OnboardingScreen(
     onManualSetup: () -> Unit,
     onSetupComplete: () -> Unit,
+    onQrScan: () -> Unit,
     onClose: () -> Unit
 ) {
-    val context = LocalContext.current
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,10 +50,7 @@ fun OnboardingScreen(
         SettingsActionCard(
             title = "Scan QR code",
             description = "Open camera to scan setup QR from another device",
-            onClick = {
-                val intent = Intent(context, QrScanActivity::class.java)
-                context.startActivity(intent)
-            }
+            onClick = onQrScan
         )
 
         // 3. Demo mode

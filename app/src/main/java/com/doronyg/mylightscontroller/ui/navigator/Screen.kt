@@ -11,4 +11,6 @@ sealed class Screen {
     data object Onboarding : Screen()
 
     data object ManualSetup : Screen()
+
+    data object QrScan : Screen()
 }

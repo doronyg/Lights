@@ -28,10 +28,12 @@ import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.onboarding.models.AppConfig
+import com.doronyg.mylightscontroller.onboarding.models.HaSetupPayload.Companion.parseSetupDeepLinkSafe
 import com.doronyg.mylightscontroller.onboarding.ui.ManualSetupScreen
 import com.doronyg.mylightscontroller.onboarding.ui.OnboardingScreen
 import com.doronyg.mylightscontroller.ui.navigator.AppNavigator
 import com.doronyg.mylightscontroller.ui.navigator.Screen
+import com.doronyg.mylightscontroller.ui.navigator.Screen.*
 import com.doronyg.mylightscontroller.ui.navigator.UiEvent.*
 import com.doronyg.mylightscontroller.utils.AppTranslator
 
@@ -149,10 +151,13 @@ fun MainScreen(
                             navigator.handle(NavigateTo(Screen.ManualSetup))
                         },
                         onSetupComplete = {
-                            navigator.handle(Replace(Screen.Tab(BottomTab.Main)))
+                            navigator.handle(Replace(Tab(BottomTab.Main)))
                         },
                         onClose = {
                             navigator.handle(NavigateBack)
+                        },
+                        onQrScan = {
+                            navigator.handle(NavigateTo(Screen.QrScan))
                         }
                     )
                 }
@@ -160,7 +165,26 @@ fun MainScreen(
                 Screen.ManualSetup -> {
                     ManualSetupScreen(
                         onSave = {
-                            navigator.handle(SetRoot(Screen.Tab(BottomTab.Main)))
+                            navigator.handle(SetRoot(Tab(BottomTab.Main)))
+                        },
+                        onBack = {
+                            navigator.handle(NavigateBack)
+                        }
+                    )
+                }
+
+                Screen.QrScan -> {
+                    QrScanScreen(
+                        onQrScanned = { scannedConfig ->
+                            parseSetupDeepLinkSafe(scannedConfig)?.apply {
+                                Config.homeAssistantUrl = haUrl
+                                Config.homeAssistantToken = haToken
+                                porcupineKey?.let { porcupineKey ->
+                                    Config.porcupineApiKey = porcupineKey
+                                }
+                                Settings.isConfigured = true
+                            }
+                            navigator.handle(SetRoot(Tab(BottomTab.Main)))
                         },
                         onBack = {
                             navigator.handle(NavigateBack)
