@@ -11,6 +11,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
@@ -18,6 +20,13 @@ import java.lang.ref.WeakReference
 class HomeAssistantRepository private constructor() : HomeAssistantInterface {
 
     private val listeners = mutableListOf< WeakReference<HomeAssistantInterface.Listener>>()
+
+    // --- Reactive state flows (for KMP compatibility) ---
+    private val _devices = MutableStateFlow<List<HaDevice>>(emptyList())
+    val devices: StateFlow<List<HaDevice>> = _devices
+
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
 
     // --- UI presence tracking (separate from data listeners) ---
     private var nextToken = 0
@@ -101,11 +110,14 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
             }
 
             CoroutineScope(Dispatchers.Main).launch {
+                _devices.value = devices
                 onResult(devices)
 
                 if (refresh) {
                     notifyListeners()
                 }
+
+                _loading.value = false
             }
         }
     }
@@ -148,6 +160,7 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
         pollingJob = scope.launch {
             try {
                 while (isActive && activeUiTokens.isNotEmpty()) {
+                    _loading.value = true
                     fetchAllLights(true) {}
                     delay(pollingIterationMillis)
                 }

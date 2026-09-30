@@ -19,7 +19,7 @@ import com.doronyg.mylightscontroller.ha.HaDevice
 @Composable
 fun DeviceGrid(
     devices: List<HaDevice>,
-    viewModel: DevicesViewModel
+    stateHolder: DevicesStateHolder
 ) {
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
@@ -69,13 +69,13 @@ fun DeviceGrid(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         if (device.isOn) {
-                            viewModel.turnOff(listOf(device))
+                            stateHolder.turnOff(listOf(device))
                         } else {
-                            viewModel.turnOn(listOf(device))
+                            stateHolder.turnOn(listOf(device))
                         }
                     },
                     onBrightnessChange = { newBrightness ->
-                        viewModel.turnOn(listOf(device), newBrightness)
+                        stateHolder.turnOn(listOf(device), newBrightness)
                     }
                 )
             }

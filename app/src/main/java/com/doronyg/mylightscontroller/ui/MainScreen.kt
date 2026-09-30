@@ -16,6 +16,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,14 +45,21 @@ enum class BottomTab(val title: String, val icon: ImageVector) {
 
 @Composable
 fun MainScreen(
-    devicesViewModel: DevicesViewModel = viewModel(),
+    stateHolder: DevicesStateHolder = remember { DevicesStateHolder() },
     translatorViewModel: TranslatorViewModel = viewModel()
 ) {
-    val devices by devicesViewModel.devices.collectAsState()
-    val loading by devicesViewModel.loading.collectAsState()
+    val devices by stateHolder.devices.collectAsState()
+    val loading by stateHolder.loading.collectAsState()
     val translatorReady by translatorViewModel.ready.collectAsState()
 
     val navigator = remember { AppNavigator() }
+
+    // Cleanup listener when screen exits
+    DisposableEffect(Unit) {
+        onDispose {
+            stateHolder.cleanup()
+        }
+    }
 
     val canGoBack = navigator.stack.size > 1
 
@@ -101,7 +109,7 @@ fun MainScreen(
                 .padding(12.dp)
         ) {
 
-            if (loading || !translatorReady) {
+            if (!translatorReady || (loading && devices.isEmpty())) {
                 Text("Loading...")
                 return@Scaffold
             }
@@ -112,11 +120,11 @@ fun MainScreen(
                     when (current.tab) {
 
                         BottomTab.Main -> {
-                            DeviceGrid(devices.filter { !it.unavailable }, devicesViewModel)
+                            DeviceGrid(devices.filter { !it.unavailable }, stateHolder)
                         }
 
                         BottomTab.Unavailable -> {
-                            DeviceGrid(devices.filter { it.unavailable }, devicesViewModel)
+                            DeviceGrid(devices.filter { it.unavailable }, stateHolder)
                         }
 
                         BottomTab.Settings -> {

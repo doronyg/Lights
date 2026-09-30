@@ -51,7 +51,7 @@ object HomeAssistantApi : HomeAssistantInterface {
                 onResult(filteredDevices)
             },
             onError = { e ->
-                Utils.log("HomeAssistantApi Failed to fetch states")
+                Utils.log("HomeAssistantApi failed to fetch states")
                 Utils.logException(e)
                 onResult(emptyList())
             }
@@ -106,13 +106,24 @@ object HomeAssistantApi : HomeAssistantInterface {
             body = command,
             onSuccess = {
                 Utils.log("HomeAssistantApi $endpoint response: success")
-                listeners.forEach { it.get()?.onUpdate() }
+                updateLightsAndNotify()
+
+                // Refetch as sometimes HA doesn't update the state immediately, so we fetch again after a delay
+                Utils.post( {
+                    updateLightsAndNotify()
+                }, 5000)
             },
             onError = { e ->
                 Utils.log("HomeAssistantApi Failed to POST $endpoint")
                 Utils.logException(e)
             }
         )
+    }
+
+    private fun updateLightsAndNotify() {
+        fetchAllLights(true) {
+            listeners.forEach { it.get()?.onUpdate() }
+        }
     }
 }
 
