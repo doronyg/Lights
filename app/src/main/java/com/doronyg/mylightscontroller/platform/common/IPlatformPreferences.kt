@@ -1,5 +1,7 @@
 package com.doronyg.mylightscontroller.platform.common
 
+import com.doronyg.mylightscontroller.utils.Base64Codec
+import com.doronyg.mylightscontroller.utils.StringCodec
 import kotlin.properties.ReadWriteProperty
 
 /**
@@ -14,7 +16,7 @@ interface IPlatformPreferences {
     fun stringPref(
         key: String,
         default: String = "",
-        codec: com.doronyg.mylightscontroller.utils.StringCodec = com.doronyg.mylightscontroller.utils.Base64Codec
+        codec: StringCodec = Base64Codec
     ): ReadWriteProperty<Any, String>
 }
 

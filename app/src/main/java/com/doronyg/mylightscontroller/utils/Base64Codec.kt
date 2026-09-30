@@ -1,20 +1,17 @@
 package com.doronyg.mylightscontroller.utils
 
-import android.util.Base64
+import kotlin.io.encoding.Base64
 
 object Base64Codec : StringCodec {
 
     override fun encode(value: String): String {
-        return Base64.encodeToString(
-            value.toByteArray(Charsets.UTF_8),
-            Base64.URL_SAFE or Base64.NO_WRAP
-        )
+        return Base64.UrlSafe.encode(value.toByteArray(Charsets.UTF_8))
     }
 
     override fun decode(value: String): String {
         return try {
             String(
-                Base64.decode(value, Base64.URL_SAFE or Base64.NO_WRAP),
+                Base64.UrlSafe.decode(value),
                 Charsets.UTF_8
             )
         } catch (e: Exception) {
