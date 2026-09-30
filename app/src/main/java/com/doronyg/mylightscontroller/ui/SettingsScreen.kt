@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.BuildConfig
 import com.doronyg.mylightscontroller.Settings
-import com.doronyg.mylightscontroller.services.VoiceControllerService
+import com.doronyg.mylightscontroller.platform.PlatformBridge
 import com.doronyg.mylightscontroller.ui.navigator.Screen
 import com.doronyg.mylightscontroller.ui.navigator.UiEvent
 import com.doronyg.mylightscontroller.utils.EmailHelper
@@ -48,9 +48,9 @@ fun SettingsScreen(
                 pref = Settings::withVoiceControllerService,
                 onToggle = { enabled ->
                     if (enabled) {
-                        VoiceControllerService.startService(context, boot = false)
+                        PlatformBridge.voiceController.startService(context, boot = false)
                     } else {
-                        VoiceControllerService.stopService(context)
+                        PlatformBridge.voiceController.stopService(context)
                     }
                 }
             )

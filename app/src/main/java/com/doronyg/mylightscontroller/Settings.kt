@@ -1,68 +1,27 @@
 package com.doronyg.mylightscontroller
 
-import android.content.Context
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import com.doronyg.mylightscontroller.platform.PlatformBridge
 import com.doronyg.mylightscontroller.utils.Base64Codec
 import com.doronyg.mylightscontroller.utils.StringCodec
-import com.doronyg.mylightscontroller.utils.Utils
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
 
+/**
+ * Application settings management.
+ * Platform-specific preference storage is provided by PlatformBridge.
+ */
 object Settings {
 
-    private const val PREF_NAME = "app_settings"
+    // --- Settings ---
+    var withVoiceControllerService by PlatformBridge.preferences.booleanPref("WITH_VOICE_CONTROLLER_SERVICE_SHARED_PREF")
+    var secondsForHaUpdateOnUi by PlatformBridge.preferences.intPref("SECONDS_FOR_HA_UPDATE_ON_UI", 30)
+    var saveMockHaData by PlatformBridge.preferences.booleanPref("SAVE_MOCK_HA_DATA")
+    var useMockHaData by PlatformBridge.preferences.booleanPref("USE_MOCK_HA_DATA")
+    var isConfigured by PlatformBridge.preferences.booleanPref("IS_CONFIGURED", !Config.homeAssistantUrl.isEmpty())
 
-    private val prefs: SharedPreferences?
-        get() = Utils.appContext?.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-
-    // --- Generic Boolean delegate ---
-    private fun booleanPref(key: String, default: Boolean = false) =
-        object : ReadWriteProperty<Any, Boolean> {
-            override fun getValue(thisRef: Any, property: KProperty<*>): Boolean =
-                prefs?.getBoolean(key, default) ?: default
-
-            override fun setValue(thisRef: Any, property: KProperty<*>, value: Boolean) {
-                prefs?.edit { putBoolean(key, value) }
-            }
-        }
-
-    // --- Generic Int delegate ---
-    private fun intPref(key: String, default: Int = 0) =
-        object : ReadWriteProperty<Any, Int> {
-            override fun getValue(thisRef: Any, property: KProperty<*>): Int =
-                prefs?.getInt(key, default) ?: default
-
-            override fun setValue(thisRef: Any, property: KProperty<*>, value: Int) {
-                prefs?.edit { putInt(key, value) }
-            }
-        }
+    fun withMockData() = useMockHaData || !isConfigured
 
     fun stringPref(
         key: String,
         default: String = "",
         codec: StringCodec = Base64Codec
-    ) = object : ReadWriteProperty<Any, String> {
-
-        override fun getValue(thisRef: Any, property: KProperty<*>): String {
-            val raw = prefs?.getString(key, null) ?: return default
-            return runCatching { codec.decode(raw) }.getOrDefault(default)
-        }
-
-        override fun setValue(thisRef: Any, property: KProperty<*>, value: String) {
-            val encoded = runCatching { codec.encode(value) }
-                .getOrDefault(value)
-
-            prefs?.edit { putString(key, encoded) }
-        }
-    }
-
-    // --- Settings ---
-    var withVoiceControllerService by booleanPref("WITH_VOICE_CONTROLLER_SERVICE_SHARED_PREF")
-    var secondsForHaUpdateOnUi by intPref("SECONDS_FOR_HA_UPDATE_ON_UI", 30)
-    var saveMockHaData by booleanPref("SAVE_MOCK_HA_DATA")
-    var useMockHaData by booleanPref("USE_MOCK_HA_DATA")
-    var isConfigured by booleanPref("IS_CONFIGURED", !Config.homeAssistantUrl.isEmpty())
-
-    fun withMockData() = useMockHaData || !isConfigured
+    ) = PlatformBridge.preferences.stringPref(key, default, codec)
 }

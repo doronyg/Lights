@@ -1,32 +1,27 @@
 package com.doronyg.mylightscontroller.utils
 
-import android.content.Context
-import androidx.core.content.edit
-import com.google.mlkit.common.model.DownloadConditions
-import com.google.mlkit.nl.translate.TranslateLanguage
-import com.google.mlkit.nl.translate.Translation
-import com.google.mlkit.nl.translate.Translator
-import com.google.mlkit.nl.translate.TranslatorOptions
+import com.doronyg.mylightscontroller.platform.PlatformBridge
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Locale
-import kotlin.coroutines.resumeWithException
 
+/**
+ * Multiplatform translator facade.
+ * Platform-specific implementation details are delegated via PlatformBridge.
+ *
+ * This object provides:
+ * - Multiplatform StateFlow for reactive ready state
+ * - Shared caching logic
+ * - Suspend translate/preload functions
+ */
 object AppTranslator {
 
-    private lateinit var appContext: Context
-    private val prefs by lazy {
-        appContext.getSharedPreferences("translations", Context.MODE_PRIVATE)
-    }
-
+    private var appContext: android.content.Context? = null
     private val initMutex = Mutex()
-
-    private var translator: Translator? = null
 
     private val targetLanguage: String by lazy {
         Locale.getDefault().language
@@ -41,7 +36,7 @@ object AppTranslator {
 
     private val memoryCache = mutableMapOf<String, String>()
 
-    fun init(context: Context) {
+    fun init(context: android.content.Context) {
         appContext = context.applicationContext
     }
 
@@ -52,20 +47,11 @@ object AppTranslator {
         }
 
         initMutex.withLock {
-            if (translator != null) {
-                _ready.value = true
+            if (_ready.value) {
                 return
             }
 
-            val options = TranslatorOptions.Builder()
-                .setSourceLanguage(TranslateLanguage.ENGLISH)
-                .setTargetLanguage(targetLanguage)
-                .build()
-
-            translator = Translation.getClient(options)
-
-            downloadModelIfNeeded()
-
+            PlatformBridge.translator.initializeTranslator(targetLanguage)
             _ready.value = true
         }
     }
@@ -86,17 +72,7 @@ object AppTranslator {
         val cached = getFromCache(text)
         if (cached != null) return cached
 
-        val t = translator ?: return text
-
-        val result = suspendCancellableCoroutine<String> { cont ->
-            t.translate(text)
-                .addOnSuccessListener { cont.resume(it) { _, _, _ -> } }
-                .addOnFailureListener {
-                    Utils.log("Translation failed for '$text': ${it.message}")
-                    cont.resume(text) { _, _, _ -> }
-                }
-        }
-
+        val result = PlatformBridge.translator.translateText(text)
         saveToCache(text, result)
         return result
     }
@@ -104,7 +80,7 @@ object AppTranslator {
     /**
      * Returns a translation from the in-memory cache if available.
      *
-     * This function is fully synchronous and does not perform any ML Kit calls.
+     * This function is fully synchronous and does not perform any translation calls.
      *
      * ⚠️ Limitation:
      * If a translation was not preloaded via AppTranslator.preload(...),
@@ -129,48 +105,29 @@ object AppTranslator {
     suspend fun preload(texts: List<String>) {
         if (isEnglish) return
 
-        val t = translator ?: return
         texts.forEach { text ->
-            val translated = suspendCancellableCoroutine<String> { cont ->
-                t.translate(text)
-                    .addOnSuccessListener { cont.resume(it) { _, _, _ -> } }
-                    .addOnFailureListener { cont.resume(text) { _, _, _ -> } }
-            }
+            val translated = PlatformBridge.translator.translateText(text)
             memoryCache[text] = translated
         }
     }
 
-    private suspend fun downloadModelIfNeeded() {
-        val t = translator ?: return
-
-        val conditions = DownloadConditions.Builder()
-            .requireWifi()
-            .build()
-
-        suspendCancellableCoroutine { cont ->
-            t.downloadModelIfNeeded(conditions)
-                .addOnSuccessListener { cont.resume(Unit) { _, _, _ -> } }
-                .addOnFailureListener { cont.resumeWithException(it) }
-        }
-    }
-
     private fun getFromCache(text: String): String? {
-        return prefs.getString(cacheKey(text), null)
+        val cached = memoryCache[text]
+        if (cached != null) return cached
+
+        // Also check platform-specific storage
+        return PlatformBridge.translator.getFromCache(text)?.also {
+            memoryCache[text] = it
+        }
     }
 
     private fun saveToCache(original: String, translated: String) {
-        prefs.edit {
-            putString(cacheKey(original), translated)
-        }
-    }
-
-    private fun cacheKey(text: String): String {
-        return "$targetLanguage:$text"
+        memoryCache[original] = translated
+        PlatformBridge.translator.saveToCache(original, translated)
     }
 
     fun close() {
-        translator?.close()
-        translator = null
+        PlatformBridge.translator.close()
         _ready.value = false
     }
 }
