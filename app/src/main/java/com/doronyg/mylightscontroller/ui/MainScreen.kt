@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.onboarding.models.AppConfig
@@ -46,11 +45,11 @@ enum class BottomTab(val title: String, val icon: ImageVector) {
 @Composable
 fun MainScreen(
     stateHolder: DevicesStateHolder = remember { DevicesStateHolder() },
-    translatorViewModel: TranslatorViewModel = viewModel()
+    translatorStateHolder: TranslatorStateHolder = remember { TranslatorStateHolder() }
 ) {
     val devices by stateHolder.devices.collectAsState()
     val loading by stateHolder.loading.collectAsState()
-    val translatorReady by translatorViewModel.ready.collectAsState()
+    val translatorReady by translatorStateHolder.ready.collectAsState()
 
     val navigator = remember { AppNavigator() }
 
