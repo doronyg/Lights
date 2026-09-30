@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.camera.view.PreviewView
 import androidx.lifecycle.LifecycleOwner
 import com.doronyg.mylightscontroller.platform.android.AndroidPlatformDefaultConfig
+import com.doronyg.mylightscontroller.platform.android.AndroidPlatformLogger
 import com.doronyg.mylightscontroller.platform.android.AndroidPlatformPermissions
 import com.doronyg.mylightscontroller.platform.android.AndroidPlatformPreferences
 import com.doronyg.mylightscontroller.platform.android.AndroidPlatformQrScanner
 import com.doronyg.mylightscontroller.platform.android.AndroidPlatformTranslator
 import com.doronyg.mylightscontroller.platform.android.AndroidPlatformVoiceController
 import com.doronyg.mylightscontroller.platform.common.IPlatformDefaultConfig
+import com.doronyg.mylightscontroller.platform.common.IPlatformLogger
 import com.doronyg.mylightscontroller.platform.common.IPlatformPermissions
 import com.doronyg.mylightscontroller.platform.common.IPlatformPreferences
 import com.doronyg.mylightscontroller.platform.common.IPlatformQrScanner
@@ -30,6 +32,7 @@ object PlatformBridge {
     val translator: IPlatformTranslator = AndroidPlatformTranslator
     val voiceController: IPlatformVoiceController = AndroidPlatformVoiceController
     val defaultConfig: IPlatformDefaultConfig = AndroidPlatformDefaultConfig
+    val logger: IPlatformLogger = AndroidPlatformLogger
 
     /**
      * Create a QR scanner instance. Needs to be called with the appropriate context and lifecycle.

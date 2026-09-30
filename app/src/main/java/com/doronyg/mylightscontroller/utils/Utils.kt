@@ -4,8 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Handler
-import android.util.Log
 import androidx.core.content.ContextCompat
+import com.doronyg.mylightscontroller.platform.PlatformBridge
 
 object Utils {
 
@@ -22,11 +22,11 @@ object Utils {
     var handler : Handler? = null
 
     fun log(string: String) {
-        Log.i("LightsLog", string)
+        PlatformBridge.logger.info("LightsLog", string)
     }
 
     fun logException(e: Throwable, message : String? = null) {
-        log("Log exception: ${message ?: ""} - ${e.javaClass.canonicalName} - ${e.message}")
+        PlatformBridge.logger.error("LightsLog", "Log exception: ${message ?: ""} - ${e.javaClass.canonicalName} - ${e.message}", e)
     }
 
     fun post(runnable: Runnable, delay : Long? = null) {
