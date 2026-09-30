@@ -1,25 +1,25 @@
 package com.doronyg.mylightscontroller.ha.mock
-import android.content.Context
-import android.content.SharedPreferences
-import androidx.core.content.edit
+
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HomeAssistantInterface
+import com.doronyg.mylightscontroller.platform.PlatformBridge
 import com.doronyg.mylightscontroller.utils.JsonUtils
 import com.doronyg.mylightscontroller.utils.Utils
 import kotlinx.serialization.encodeToString
 import java.lang.ref.WeakReference
 
 object HomeAssistantApiMock : HomeAssistantInterface {
-    private const val PREF_NAME = "mock_ha_data"
     private const val MOCK_DATA_KEY = "mock_ha_devices"
     private val listeners = mutableListOf<WeakReference<HomeAssistantInterface.Listener>>()
-    private val prefs: SharedPreferences?
-        get() = Utils.appContext?.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+
+    // Use platform-agnostic preferences
+    private var mockDevicesJson by PlatformBridge.preferences.stringPref(MOCK_DATA_KEY, "")
+
     // --- Helper to load cached devices ---
     private fun loadDevices(): List<HaDevice> {
-        val jsonString = prefs?.getString(MOCK_DATA_KEY, null)
-        return if (jsonString != null) {
+        val jsonString = mockDevicesJson
+        return if (jsonString.isNotEmpty()) {
             try {
                 JsonUtils.json.decodeFromString<List<HaDevice>>(jsonString)
             } catch (e: Exception) {
@@ -31,12 +31,13 @@ object HomeAssistantApiMock : HomeAssistantInterface {
             emptyList()
         }
     }
+
     // --- Helper to save devices persistently ---
     private fun saveDevices(devices: List<HaDevice>) {
         if (!Settings.saveMockHaData) return
         try {
             val jsonString = JsonUtils.json.encodeToString(devices)
-            prefs?.edit { putString(MOCK_DATA_KEY, jsonString)?.apply() }
+            mockDevicesJson = jsonString
             Utils.log("Saved mock devices: $jsonString")
         } catch (e: Exception) {
             Utils.log("Failed to serialize mock devices: $e")
