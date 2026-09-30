@@ -1,21 +1,31 @@
 package com.doronyg.mylightscontroller.onboarding
 
-import android.graphics.Bitmap
 import android.graphics.Color.BLACK
 import android.graphics.Color.WHITE
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
-import androidx.core.graphics.createBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * QR code data generator - pure multiplatform logic.
+ *
+ * Encodes content as QR code and returns pixel data as IntArray.
+ * Platform-specific rendering (Bitmap, Canvas, etc.) is handled by the caller.
+ */
 object QrImageGenerator {
 
-    suspend fun generateQrBitmap(
+    /**
+     * Generate QR code pixel data.
+     *
+     * @param content The content to encode in the QR code
+     * @param size The size of the generated QR code in pixels
+     * @return Pair of (width, height, pixels) where pixels is an IntArray of ARGB colors
+     */
+    suspend fun generateQrPixels(
         content: String,
         size: Int = 800
-    ): Bitmap = withContext(Dispatchers.Default) {
-
+    ): QrPixelData = withContext(Dispatchers.Default) {
         val bitMatrix = QRCodeWriter()
             .encode(content, BarcodeFormat.QR_CODE, size, size)
 
@@ -23,7 +33,6 @@ object QrImageGenerator {
         val height = bitMatrix.height
 
         val pixels = IntArray(width * height)
-
         for (y in 0 until height) {
             val row = y * width
             for (x in 0 until width) {
@@ -31,8 +40,37 @@ object QrImageGenerator {
             }
         }
 
-        createBitmap(width, height).apply {
-            setPixels(pixels, 0, width, 0, 0, width, height)
-        }
+        QrPixelData(width, height, pixels)
     }
 }
+
+/**
+ * Container for QR code pixel data.
+ * Platform-agnostic representation of QR code image data.
+ */
+data class QrPixelData(
+    val width: Int,
+    val height: Int,
+    val pixels: IntArray
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as QrPixelData
+
+        if (width != other.width) return false
+        if (height != other.height) return false
+        if (!pixels.contentEquals(other.pixels)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = width
+        result = 31 * result + height
+        result = 31 * result + pixels.contentHashCode()
+        return result
+    }
+}
+

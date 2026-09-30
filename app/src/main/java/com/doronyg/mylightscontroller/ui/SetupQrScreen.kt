@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.createBitmap
 import com.doronyg.mylightscontroller.onboarding.QrImageGenerator
 import com.doronyg.mylightscontroller.onboarding.models.AppConfig
 import com.doronyg.mylightscontroller.onboarding.models.HaSetupPayload
@@ -36,7 +37,12 @@ fun SetupQrScreen(
     }
 
     val bitmapState = produceState<Bitmap?>(initialValue = null, encoded) {
-        value = QrImageGenerator.generateQrBitmap(encoded)
+        val qrPixels = QrImageGenerator.generateQrPixels(encoded)
+        // Android-specific: Convert pixel data to Bitmap
+        val bitmap = createBitmap(qrPixels.width, qrPixels.height).apply {
+            setPixels(qrPixels.pixels, 0, qrPixels.width, 0, 0, qrPixels.width, qrPixels.height)
+        }
+        value = bitmap
     }
 
     val bitmap = bitmapState.value
