@@ -1,8 +1,6 @@
-package com.doronyg.mylightscontroller
+package com.doronyg.mylightscontroller.platform.android
 
 import android.app.Application
-import com.doronyg.mylightscontroller.platform.android.AndroidActivityHolder
-import com.doronyg.mylightscontroller.platform.android.AndroidPlatformInitializer
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.utils.Utils
 import kotlinx.coroutines.CoroutineScope
