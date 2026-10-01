@@ -3,7 +3,9 @@ package com.doronyg.mylightscontroller
 import android.app.Application
 import com.doronyg.mylightscontroller.platform.android.AndroidActivityHolder
 import com.doronyg.mylightscontroller.platform.android.AndroidPlatformInitializer
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.utils.Utils
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Application entry point - initializes platform bridge and app-level services before any code runs.
@@ -20,7 +22,10 @@ class MyLightsControllerApplication : Application() {
         // 2. Set app context - needed by Utils
         Utils.appContext = applicationContext
 
-        // 3. Activity lifecycle tracking - for permission requests
+        // 3. Create main UI scope using platform-agnostic dispatcher
+        Utils.mainScope = CoroutineScope(PlatformBridge.dispatchers.uiDispatcher())
+
+        // 4. Activity lifecycle tracking - for permission requests
         AndroidActivityHolder.registerWithApplication(this)
     }
 }

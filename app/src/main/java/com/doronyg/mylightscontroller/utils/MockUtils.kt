@@ -3,8 +3,8 @@ package com.doronyg.mylightscontroller.utils
 import android.content.Context
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import java.io.File
@@ -17,7 +17,7 @@ object MockUtils {
     ) {
         if (onResult == null) return
 
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(PlatformBridge.dispatchers.uiDispatcher()).launch {
             onResult(result)
         }
     }
@@ -26,7 +26,7 @@ object MockUtils {
         appContext: Context,
         onResult: ((File?) -> Unit)? = null
     ) {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(PlatformBridge.dispatchers.ioDispatcher()).launch {
             try {
                 HomeAssistantRepository.instance.fetchAllLights(
                     refresh = true

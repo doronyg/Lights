@@ -96,7 +96,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
 
     // ---------- Coroutines ----------
-    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
 
     // ---------- Compose ----------
     implementation(platform(libs.androidx.compose.bom))

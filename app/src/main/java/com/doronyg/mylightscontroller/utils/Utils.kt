@@ -4,8 +4,6 @@ import android.content.Context
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.platform.common.Permission
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -13,12 +11,6 @@ import kotlin.time.Duration.Companion.milliseconds
 object Utils {
 
     var appContext: Context? = null
-        set(value) {
-            if (field == null) {
-                field = value
-                mainScope = MainScope()
-            }
-        }
 
     var mainScope: CoroutineScope? = null
 
@@ -31,7 +23,7 @@ object Utils {
     }
 
     fun post(action: () -> Unit, delay: Long? = null) {
-        mainScope?.launch(Dispatchers.Main) {
+        mainScope?.launch(PlatformBridge.dispatchers.uiDispatcher()) {
             delay?.let { delay(it.milliseconds) }
             action()
         }

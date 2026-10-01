@@ -3,8 +3,8 @@ package com.doronyg.mylightscontroller.utils
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -21,7 +21,7 @@ object EmailHelper {
     }
 
     private fun sendFileViaEmail(appContext: Context, file: File) {
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(PlatformBridge.dispatchers.uiDispatcher()).launch {
             try {
                 val uri = FileProvider.getUriForFile(
                     appContext,

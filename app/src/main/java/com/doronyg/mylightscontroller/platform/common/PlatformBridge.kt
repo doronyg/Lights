@@ -20,6 +20,7 @@ object PlatformBridge {
     lateinit var defaultConfig: IPlatformDefaultConfig
     lateinit var logger: IPlatformLogger
     lateinit var permissions: IPlatformPermissions
+    lateinit var dispatchers: IPlatformDispatchers
 
     /**
      * Permission results map - tracks all requested permissions and their grant status.

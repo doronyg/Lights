@@ -1,6 +1,7 @@
 package com.doronyg.mylightscontroller.utils
 
 import com.doronyg.mylightscontroller.Config
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -15,7 +16,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
@@ -69,7 +69,7 @@ object NetworkUtils {
         crossinline onResult: (T) -> Unit,
         crossinline onError: (Exception) -> Unit = {}
     ) {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(PlatformBridge.dispatchers.ioDispatcher()).launch {
             try {
                 val result = haGet<T>(endpoint)
                 Utils.post({ onResult(result) })
@@ -105,7 +105,7 @@ object NetworkUtils {
         crossinline onSuccess: () -> Unit = {},
         crossinline onError: (Exception) -> Unit = {}
     ) {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(PlatformBridge.dispatchers.ioDispatcher()).launch {
             try {
                 haPost<T>(endpoint, body)
                 Utils.post({ onSuccess() })

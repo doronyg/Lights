@@ -30,6 +30,7 @@ material = { module = "com.google.android.material:material", version.ref = "mat
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activity" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 # ---------- Coroutines ----------
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 # ---------- Compose BOM ----------
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }

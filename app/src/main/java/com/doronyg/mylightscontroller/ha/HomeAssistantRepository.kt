@@ -3,8 +3,8 @@ package com.doronyg.mylightscontroller.ha
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.Settings.secondsForHaUpdateOnUi
 import com.doronyg.mylightscontroller.ha.mock.HomeAssistantApiMock
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
@@ -35,7 +35,7 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
     // --- Polling ---
     private var pollingIterationMillis = secondsForHaUpdateOnUi.coerceAtLeast(1).times(1000L)
     private var pollingJob: Job? = null
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + PlatformBridge.dispatchers.ioDispatcher())
 
     private var api: HomeAssistantInterface =
         if (Settings.withMockData()) HomeAssistantApiMock
@@ -96,7 +96,7 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
         ensureCorrectApi()
 
         api.fetchAllLights(refresh) { devices ->
-            CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(PlatformBridge.dispatchers.ioDispatcher()).launch {
                 // If using real API and saving is enabled → update mock storage
                 if (api === HomeAssistantApi && Settings.saveMockHaData) {
                     HomeAssistantApiMock.populateMockData(devices)
@@ -109,7 +109,7 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
                 }
             }
 
-            CoroutineScope(Dispatchers.Main).launch {
+            CoroutineScope(PlatformBridge.dispatchers.uiDispatcher()).launch {
                 _devices.value = devices
                 onResult(devices)
 

@@ -1,8 +1,8 @@
 package com.doronyg.mylightscontroller.ui
 
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.utils.AppTranslator
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -17,7 +17,7 @@ class TranslatorStateHolder {
     val ready: StateFlow<Boolean> = _ready
 
     init {
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(PlatformBridge.dispatchers.uiDispatcher()).launch {
             AppTranslator.initialize()
 
             AppTranslator.preload(

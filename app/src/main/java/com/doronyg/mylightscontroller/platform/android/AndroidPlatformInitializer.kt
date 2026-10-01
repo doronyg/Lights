@@ -16,6 +16,7 @@ object AndroidPlatformInitializer {
         PlatformBridge.defaultConfig = AndroidPlatformDefaultConfig
         PlatformBridge.logger = AndroidPlatformLogger
         PlatformBridge.permissions = AndroidPlatformPermissions
+        PlatformBridge.dispatchers = AndroidPlatformDispatchers()
     }
 }
 

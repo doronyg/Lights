@@ -2,9 +2,9 @@ package com.doronyg.mylightscontroller.onboarding
 
 import android.graphics.Color.BLACK
 import android.graphics.Color.WHITE
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
@@ -25,7 +25,7 @@ object QrImageGenerator {
     suspend fun generateQrPixels(
         content: String,
         size: Int = 800
-    ): QrPixelData = withContext(Dispatchers.Default) {
+    ): QrPixelData = withContext(PlatformBridge.dispatchers.defaultDispatcher()) {
         val bitMatrix = QRCodeWriter()
             .encode(content, BarcodeFormat.QR_CODE, size, size)
 
