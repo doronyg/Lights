@@ -1,4 +1,4 @@
-package com.doronyg.mylightscontroller.ui
+package com.doronyg.mylightscontroller.platform.android.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
+import com.doronyg.mylightscontroller.ui.MainScreen
+import com.doronyg.mylightscontroller.ui.MyTheme
 
 class MainFragment : Fragment() {
     private var repoToken: Int? = null

@@ -31,7 +31,7 @@ import com.doronyg.mylightscontroller.commands.VoiceCommand
 import com.doronyg.mylightscontroller.ha.DeviceType
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
-import com.doronyg.mylightscontroller.ui.MainActivity
+import com.doronyg.mylightscontroller.platform.android.ui.MainActivity
 import com.doronyg.mylightscontroller.utils.Utils
 
 class VoiceControllerService : Service() {

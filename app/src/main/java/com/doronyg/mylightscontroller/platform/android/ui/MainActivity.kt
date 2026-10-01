@@ -1,4 +1,4 @@
-package com.doronyg.mylightscontroller.ui
+package com.doronyg.mylightscontroller.platform.android.ui
 
 import android.Manifest
 import android.content.Intent
