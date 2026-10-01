@@ -44,12 +44,12 @@
         </activity>
 
         <service
-            android:name=".services.VoiceControllerService"
+            android:name=".platform.android.services.VoiceControllerService"
             android:foregroundServiceType="microphone"
             android:exported="false" />
 
         <receiver
-            android:name=".services.BootReceiver"
+            android:name=".platform.android.services.BootReceiver"
             android:enabled="true"
             android:exported="true">
 

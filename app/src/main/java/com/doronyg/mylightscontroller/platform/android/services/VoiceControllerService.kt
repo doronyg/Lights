@@ -1,4 +1,4 @@
-package com.doronyg.mylightscontroller.services
+package com.doronyg.mylightscontroller.platform.android.services
 
 import ai.picovoice.porcupine.Porcupine
 import ai.picovoice.porcupine.PorcupineManager

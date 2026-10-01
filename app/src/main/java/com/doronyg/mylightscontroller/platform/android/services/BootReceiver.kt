@@ -1,4 +1,4 @@
-package com.doronyg.mylightscontroller.services
+package com.doronyg.mylightscontroller.platform.android.services
 
 import android.content.BroadcastReceiver
 import android.content.Context

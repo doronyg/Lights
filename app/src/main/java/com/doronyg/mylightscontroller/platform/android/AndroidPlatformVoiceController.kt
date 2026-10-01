@@ -2,7 +2,7 @@ package com.doronyg.mylightscontroller.platform.android
 
 import android.content.Context
 import com.doronyg.mylightscontroller.platform.common.IPlatformVoiceController
-import com.doronyg.mylightscontroller.services.VoiceControllerService
+import com.doronyg.mylightscontroller.platform.android.services.VoiceControllerService
 
 /**
  * Android implementation of platform-specific voice controller service.

@@ -16,7 +16,7 @@ import com.doronyg.mylightscontroller.onboarding.models.HaSetupPayload.Companion
 import com.doronyg.mylightscontroller.platform.android.IPermissionHandler
 import com.doronyg.mylightscontroller.platform.common.Permission
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
-import com.doronyg.mylightscontroller.services.VoiceControllerService
+import com.doronyg.mylightscontroller.platform.android.services.VoiceControllerService
 import com.doronyg.mylightscontroller.utils.Utils
 
 class MainActivity : AppCompatActivity(), IPermissionHandler {
