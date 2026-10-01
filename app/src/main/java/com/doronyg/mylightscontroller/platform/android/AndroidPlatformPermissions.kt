@@ -26,7 +26,7 @@ object AndroidPlatformPermissions : IPlatformPermissions {
     }
 
     override fun hasPermission(permission: Permission): Boolean {
-        val context = ActivityHolder.getCurrentActivity()?.baseContext ?: return false
+        val context = AndroidActivityHolder.getCurrentActivity()?.baseContext ?: return false
         val manifestPermission = permissionToAndroidString(permission)
 
         return ContextCompat.checkSelfPermission(
@@ -37,7 +37,7 @@ object AndroidPlatformPermissions : IPlatformPermissions {
 
     override fun requestPermission(permission: Permission) {
         // Get the current resumed activity from the holder
-        val activity = ActivityHolder.getCurrentActivity()
+        val activity = AndroidActivityHolder.getCurrentActivity()
         if (activity == null) {
             Utils.log("AndroidPlatformPermissions: No activity available for permission request")
             return

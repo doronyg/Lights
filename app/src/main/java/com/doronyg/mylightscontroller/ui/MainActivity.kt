@@ -13,12 +13,10 @@ import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.R
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.onboarding.models.HaSetupPayload.Companion.parseSetupDeepLinkSafe
-import com.doronyg.mylightscontroller.platform.PlatformBridge
-import com.doronyg.mylightscontroller.platform.android.ActivityHolder
 import com.doronyg.mylightscontroller.platform.android.IPermissionHandler
 import com.doronyg.mylightscontroller.platform.common.Permission
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.services.VoiceControllerService
-import com.doronyg.mylightscontroller.utils.AppTranslator
 import com.doronyg.mylightscontroller.utils.Utils
 
 class MainActivity : AppCompatActivity(), IPermissionHandler {
@@ -27,8 +25,6 @@ class MainActivity : AppCompatActivity(), IPermissionHandler {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Utils.appContext = applicationContext
-        ActivityHolder.registerWithApplication(application)
         handleDeepLink(intent)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
@@ -37,7 +33,6 @@ class MainActivity : AppCompatActivity(), IPermissionHandler {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        AppTranslator.init(this)
     }
 
     override fun onResume() {

@@ -75,7 +75,7 @@ fun QrScanScreen(
 
     // Request permission on screen load
     LaunchedEffect(Unit) {
-        Utils.log("QrScanScreen: Requesting camera permission")
+        Utils.log("QrScanScreen: Requesting camera permission on load")
         stateHolder.requestCameraPermission()
     }
 

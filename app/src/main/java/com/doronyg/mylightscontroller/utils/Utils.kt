@@ -1,7 +1,7 @@
 package com.doronyg.mylightscontroller.utils
 
 import android.content.Context
-import com.doronyg.mylightscontroller.platform.PlatformBridge
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.platform.common.Permission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

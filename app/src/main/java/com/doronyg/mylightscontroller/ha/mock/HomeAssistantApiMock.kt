@@ -3,7 +3,7 @@ package com.doronyg.mylightscontroller.ha.mock
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HomeAssistantInterface
-import com.doronyg.mylightscontroller.platform.PlatformBridge
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.utils.JsonUtils
 import com.doronyg.mylightscontroller.utils.Utils
 import kotlinx.serialization.encodeToString

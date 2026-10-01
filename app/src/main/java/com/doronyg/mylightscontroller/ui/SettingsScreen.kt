@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.BuildConfig
 import com.doronyg.mylightscontroller.Settings
-import com.doronyg.mylightscontroller.platform.PlatformBridge
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.ui.navigator.Screen
 import com.doronyg.mylightscontroller.ui.navigator.UiEvent
 import com.doronyg.mylightscontroller.utils.EmailHelper

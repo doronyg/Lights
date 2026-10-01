@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * Automatically registers and unregisters with the Application lifecycle.
  */
-object ActivityHolder {
+object AndroidActivityHolder {
     // Map of activity id to WeakReference - thread-safe for multi-window scenarios
     private val resumedActivities = ConcurrentHashMap<Int, WeakReference<Activity>>()
     private var lastResumedActivityId = 0

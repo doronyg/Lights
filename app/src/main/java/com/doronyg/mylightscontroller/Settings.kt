@@ -1,6 +1,6 @@
 package com.doronyg.mylightscontroller
 
-import com.doronyg.mylightscontroller.platform.PlatformBridge
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.utils.Base64Codec
 import com.doronyg.mylightscontroller.utils.StringCodec
 

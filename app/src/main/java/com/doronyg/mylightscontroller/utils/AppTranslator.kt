@@ -1,6 +1,6 @@
 package com.doronyg.mylightscontroller.utils
 
-import com.doronyg.mylightscontroller.platform.PlatformBridge
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -20,7 +20,6 @@ import java.util.Locale
  */
 object AppTranslator {
 
-    private var appContext: android.content.Context? = null
     private val initMutex = Mutex()
 
     private val targetLanguage: String by lazy {
@@ -36,9 +35,6 @@ object AppTranslator {
 
     private val memoryCache = mutableMapOf<String, String>()
 
-    fun init(context: android.content.Context) {
-        appContext = context.applicationContext
-    }
 
     suspend fun initialize() {
         if (isEnglish || _ready.value) {

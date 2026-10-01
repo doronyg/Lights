@@ -1,7 +1,7 @@
 package com.doronyg.mylightscontroller
 
 import com.doronyg.mylightscontroller.Settings.stringPref
-import com.doronyg.mylightscontroller.platform.PlatformBridge
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 
 object Config {
     var homeAssistantUrl by stringPref("HA_URL", PlatformBridge.defaultConfig.defaultHaUrl)

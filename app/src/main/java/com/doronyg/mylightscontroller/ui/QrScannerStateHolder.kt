@@ -3,9 +3,10 @@ package com.doronyg.mylightscontroller.ui
 import android.content.Context
 import androidx.camera.view.PreviewView
 import androidx.lifecycle.LifecycleOwner
-import com.doronyg.mylightscontroller.platform.PlatformBridge
+import com.doronyg.mylightscontroller.platform.android.AndroidPlatformQrScanner
 import com.doronyg.mylightscontroller.platform.common.IPlatformQrScanner
 import com.doronyg.mylightscontroller.platform.common.Permission
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.utils.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +18,9 @@ import kotlinx.coroutines.launch
  *
  * Manages the lifecycle and state of QR code scanning without using ViewModels.
  * Handles camera permissions through the platform bridge, making it KMP-ready.
+ * 
+ * Note: Creates scanner directly (AndroidPlatformQrScanner). When converting to KMP,
+ * this will use expect/actual createQrScanner() function per platform.
  */
 class QrScannerStateHolder(
     private val context: Context,
@@ -24,7 +28,8 @@ class QrScannerStateHolder(
     private val coroutineScope: CoroutineScope,
     private val previewView: PreviewView? = null
 ) {
-    private val scanner: IPlatformQrScanner = PlatformBridge.createQrScanner(
+    // Create scanner directly - Android-specific but will become expect/actual in KMP
+    private val scanner: IPlatformQrScanner = AndroidPlatformQrScanner(
         context,
         lifecycleOwner,
         previewView
