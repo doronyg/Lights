@@ -1,6 +1,7 @@
 [versions]
 agp = "9.2.1"
 kotlin = "2.3.21"
+kotlinxCoroutines = "1.10.1"
 coreKtx = "1.18.0"
 appcompat = "1.7.1"
 material = "1.14.0"
@@ -28,6 +29,8 @@ androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "a
 material = { module = "com.google.android.material:material", version.ref = "material" }
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activity" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+# ---------- Coroutines ----------
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 # ---------- Compose BOM ----------
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-ui = { module = "androidx.compose.ui:ui" }

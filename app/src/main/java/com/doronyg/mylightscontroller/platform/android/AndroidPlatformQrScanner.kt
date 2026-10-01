@@ -1,8 +1,6 @@
 package com.doronyg.mylightscontroller.platform.android
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
@@ -15,7 +13,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import com.doronyg.mylightscontroller.platform.PlatformBridge
 import com.doronyg.mylightscontroller.platform.common.IPlatformQrScanner
+import com.doronyg.mylightscontroller.platform.common.Permission
 import com.doronyg.mylightscontroller.utils.Utils
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
@@ -181,10 +181,7 @@ class AndroidPlatformQrScanner(
     }
 
     private fun hasCameraPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED
+        return PlatformBridge.permissions.hasPermission(Permission.CAMERA)
     }
 }
 

@@ -5,8 +5,10 @@ import androidx.camera.view.PreviewView
 import androidx.lifecycle.LifecycleOwner
 import com.doronyg.mylightscontroller.platform.PlatformBridge
 import com.doronyg.mylightscontroller.platform.common.IPlatformQrScanner
+import com.doronyg.mylightscontroller.platform.common.Permission
 import com.doronyg.mylightscontroller.utils.Utils
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -14,7 +16,7 @@ import kotlinx.coroutines.launch
  * State holder for QR scanner functionality.
  *
  * Manages the lifecycle and state of QR code scanning without using ViewModels.
- * This keeps the scanning logic decoupled from the UI layer and makes it testable.
+ * Handles camera permissions through the platform bridge, making it KMP-ready.
  */
 class QrScannerStateHolder(
     private val context: Context,
@@ -27,6 +29,13 @@ class QrScannerStateHolder(
         lifecycleOwner,
         previewView
     )
+
+    private val _permissionGranted = MutableStateFlow(false)
+
+    /**
+     * Whether camera permission has been granted.
+     */
+    val permissionGranted: StateFlow<Boolean> = _permissionGranted
 
     /**
      * The scanned QR code value, or null if not yet scanned.
@@ -43,11 +52,45 @@ class QrScannerStateHolder(
      */
     val errorMessage: StateFlow<String?> = scanner.errorMessage
 
+    init {
+        // Observe permission results from the bridge and update local state
+        coroutineScope.launch {
+            PlatformBridge.permissionResults.collect { results ->
+                val cameraPermissionGranted = results[Permission.CAMERA] ?: false
+                if (_permissionGranted.value != cameraPermissionGranted) {
+                    Utils.log("QrScannerStateHolder: Camera permission changed to $cameraPermissionGranted")
+                    _permissionGranted.value = cameraPermissionGranted
+
+                    // Automatically start scanning when permission is granted
+                    if (cameraPermissionGranted) {
+                        Utils.log("QrScannerStateHolder: Permission granted, starting scanning")
+                        startScanning()
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Request camera permission from the platform.
+     * Permission result will be delivered via PlatformBridge.permissionResults StateFlow.
+     * Call this when the user needs to grant camera permission.
+     */
+    fun requestCameraPermission() {
+        Utils.log("QrScannerStateHolder: Requesting camera permission")
+        PlatformBridge.permissions.requestPermission(Permission.CAMERA)
+        // Permission result will arrive asynchronously via PlatformBridge.permissionResults StateFlow
+    }
+
     /**
      * Start scanning for QR codes.
      */
     fun startScanning() {
-        Utils.log("QrScannerStateHolder: startScanning() called, previewView=$previewView")
+        Utils.log("QrScannerStateHolder: startScanning() called, isPermissionGranted=${_permissionGranted.value}")
+        if (!_permissionGranted.value) {
+            Utils.log("QrScannerStateHolder: Cannot start scanning - permission not granted")
+            return
+        }
         coroutineScope.launch {
             Utils.log("QrScannerStateHolder: About to call scanner.startScanning()")
             scanner.startScanning()
@@ -69,7 +112,3 @@ class QrScannerStateHolder(
         scanner.reset()
     }
 }
-
-
-
-

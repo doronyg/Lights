@@ -43,7 +43,7 @@ class VoiceControllerService : Service() {
         private var createdByBoot : Boolean? = null
 
         fun startService(context: Context, boot: Boolean) {
-            if (Utils.checkAppPermissions(context) && Settings.withVoiceControllerService) {
+            if (Utils.checkAppPermissions() && Settings.withVoiceControllerService) {
                 createdByBoot = this.createdByBoot ?: boot
                 val serviceIntent = Intent(context, VoiceControllerService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

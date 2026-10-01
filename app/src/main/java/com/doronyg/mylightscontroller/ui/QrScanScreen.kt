@@ -1,8 +1,5 @@
 package com.doronyg.mylightscontroller.ui
 
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,16 +43,8 @@ fun QrScanScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
 
-    var permissionGranted by remember { mutableStateOf(false) }
     val previewView = remember { PreviewView(context) }
     var hasHandledScan by remember { mutableStateOf(false) }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        Utils.log("QrScanScreen: Camera permission result: $isGranted")
-        permissionGranted = isGranted
-    }
 
     val stateHolder = remember {
         QrScannerStateHolder(
@@ -68,6 +58,7 @@ fun QrScanScreen(
     val scannedValue by stateHolder.scannedValue.collectAsState()
     val isScanning by stateHolder.isScanning.collectAsState()
     val errorMessage by stateHolder.errorMessage.collectAsState()
+    val permissionGranted by stateHolder.permissionGranted.collectAsState()
 
     // Debug: Log state changes
     LaunchedEffect(permissionGranted) {
@@ -82,10 +73,10 @@ fun QrScanScreen(
         Utils.log("QrScanScreen: scannedValue=$scannedValue")
     }
 
-    // Request permission and start scanning when the screen is first displayed
+    // Request permission on screen load
     LaunchedEffect(Unit) {
-        Utils.log("QrScanScreen: Launching camera permission request")
-        permissionLauncher.launch(Manifest.permission.CAMERA)
+        Utils.log("QrScanScreen: Requesting camera permission")
+        stateHolder.requestCameraPermission()
     }
 
     // Start scanning once permission is granted
@@ -176,6 +167,14 @@ fun QrScanScreen(
                         text = "Requesting camera permission...",
                         textAlign = TextAlign.Center
                     )
+                    IconButton(onClick = {
+                        stateHolder.requestCameraPermission()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Redo,
+                            contentDescription = "Retry"
+                        )
+                    }
                 } else {
                     // Ready to scan
                     Text(

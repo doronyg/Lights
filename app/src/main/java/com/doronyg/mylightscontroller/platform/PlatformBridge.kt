@@ -1,8 +1,10 @@
 package com.doronyg.mylightscontroller.platform
 
+import android.app.Application
 import android.content.Context
 import androidx.camera.view.PreviewView
 import androidx.lifecycle.LifecycleOwner
+import com.doronyg.mylightscontroller.platform.android.ActivityHolder
 import com.doronyg.mylightscontroller.platform.android.AndroidPlatformDefaultConfig
 import com.doronyg.mylightscontroller.platform.android.AndroidPlatformLogger
 import com.doronyg.mylightscontroller.platform.android.AndroidPlatformPermissions
@@ -17,6 +19,9 @@ import com.doronyg.mylightscontroller.platform.common.IPlatformPreferences
 import com.doronyg.mylightscontroller.platform.common.IPlatformQrScanner
 import com.doronyg.mylightscontroller.platform.common.IPlatformTranslator
 import com.doronyg.mylightscontroller.platform.common.IPlatformVoiceController
+import com.doronyg.mylightscontroller.platform.common.Permission
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Single access point for all platform-specific implementations.
@@ -33,6 +38,27 @@ object PlatformBridge {
     val voiceController: IPlatformVoiceController = AndroidPlatformVoiceController
     val defaultConfig: IPlatformDefaultConfig = AndroidPlatformDefaultConfig
     val logger: IPlatformLogger = AndroidPlatformLogger
+    val permissions: IPlatformPermissions = AndroidPlatformPermissions
+
+    /**
+     * Permission results map - tracks all requested permissions and their grant status.
+     * Key: platform-independent Permission enum
+     * Value: true if granted, false if denied
+     * UI can observe this StateFlow to be notified of permission changes.
+     * This is completely platform-independent and lives in the bridge layer.
+     */
+    private val _permissionResults = MutableStateFlow<Map<Permission, Boolean>>(emptyMap())
+    val permissionResults: StateFlow<Map<Permission, Boolean>> = _permissionResults
+
+    /**
+     * Called by the activity when a permission request result is received.
+     * Updates the permission results map with the platform-independent Permission enum.
+     */
+    fun onPermissionResult(permission: Permission, granted: Boolean) {
+        val currentResults = _permissionResults.value.toMutableMap()
+        currentResults[permission] = granted
+        _permissionResults.value = currentResults
+    }
 
     /**
      * Create a QR scanner instance. Needs to be called with the appropriate context and lifecycle.
@@ -46,12 +72,4 @@ object PlatformBridge {
     ): IPlatformQrScanner {
         return AndroidPlatformQrScanner(context, lifecycleOwner, previewView)
     }
-
-    /**
-     * Create a permissions handler. Needs context to check/request permissions.
-     */
-    fun createPermissions(context: Context): IPlatformPermissions {
-        return AndroidPlatformPermissions(context)
-    }
 }
-

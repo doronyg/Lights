@@ -1,10 +1,8 @@
 package com.doronyg.mylightscontroller.utils
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 import com.doronyg.mylightscontroller.platform.PlatformBridge
+import com.doronyg.mylightscontroller.platform.common.Permission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -39,7 +37,21 @@ object Utils {
         }
     }
 
-    fun checkAppPermissions(context: Context): Boolean =
-        ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+    /**
+     * Check if microphone permission is granted via the platform bridge.
+     * Uses Permission.MICROPHONE enum (platform-independent).
+     */
+    fun checkAppPermissions(): Boolean {
+        return PlatformBridge.permissions.hasPermission(Permission.MICROPHONE)
+    }
+
+    /**
+     * Request microphone permission via the platform bridge.
+     * Uses Permission.MICROPHONE enum (platform-independent).
+     * Permission result will be delivered via MainActivity.permissionResult StateFlow.
+     */
+    fun requestAppPermissions() {
+        PlatformBridge.permissions.requestPermission(Permission.MICROPHONE)
+    }
 
 }
