@@ -88,6 +88,9 @@ android {
 
 dependencies {
 
+    // ---------- Shared (KMP) logic ----------
+    implementation(project(":shared"))
+
     // ---------- Core Android ----------
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -136,9 +139,8 @@ dependencies {
     implementation(libs.porcupine.android)
 
     // ---------- Unit & Instrumentation Tests ----------
+    // (QR encoder unit tests live in :shared)
     testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test.junit) // kotlin.test API, portable to commonTest
-    testImplementation(libs.zxing.core) // only used to verify our QR encoder
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
