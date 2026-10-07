@@ -1,172 +1,167 @@
 package com.doronyg.mylightscontroller.ha
 
 import com.doronyg.mylightscontroller.Settings
-import com.doronyg.mylightscontroller.Settings.secondsForHaUpdateOnUi
 import com.doronyg.mylightscontroller.ha.mock.HomeAssistantApiMock
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
+import com.doronyg.mylightscontroller.utils.Utils
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
 
-class HomeAssistantRepository private constructor() : HomeAssistantInterface {
+/**
+ * Single source of truth for Home Assistant devices, and the only place that decides
+ * when to talk to Home Assistant (polling, follow-up refreshes after commands).
+ *
+ * All state is confined to the UI dispatcher. [registerUi] / [unregisterUi] must be called
+ * from the UI thread; all other public functions are safe to call from any thread.
+ */
+class HomeAssistantRepository private constructor() {
 
-    private val listeners = mutableListOf< WeakReference<HomeAssistantInterface.Listener>>()
-
-    // --- Reactive state flows (for KMP compatibility) ---
+    // --- Reactive state ---
     private val _devices = MutableStateFlow<List<HaDevice>>(emptyList())
-    val devices: StateFlow<List<HaDevice>> = _devices
+    val devices: StateFlow<List<HaDevice>> = _devices.asStateFlow()
 
     private val _loading = MutableStateFlow(false)
-    val loading: StateFlow<Boolean> = _loading
+    val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
-    // --- UI presence tracking (separate from data listeners) ---
+    private val scope = CoroutineScope(SupervisorJob() + PlatformBridge.dispatchers.uiDispatcher())
+
+    // --- UI presence tracking ---
     private var nextToken = 0
     private val activeUiTokens = mutableSetOf<Int>()
 
-    // --- Polling ---
-    private var pollingIterationMillis = secondsForHaUpdateOnUi.coerceAtLeast(1).times(1000L)
+    // --- Background jobs ---
     private var pollingJob: Job? = null
-    private val scope = CoroutineScope(SupervisorJob() + PlatformBridge.dispatchers.ioDispatcher())
+    private var followUpRefreshJob: Job? = null
 
-    private var api: HomeAssistantInterface =
-        if (Settings.withMockData()) HomeAssistantApiMock
-        else HomeAssistantApi
-
-    private val apiListener = object : HomeAssistantInterface.Listener {
-        override fun onUpdate() {
-            notifyListeners()
-        }
-    }
+    // Re-evaluated on every call, so switching the mock setting takes effect immediately
+    private val api: HomeAssistantInterface
+        get() = if (Settings.withMockData()) HomeAssistantApiMock else HomeAssistantApi
 
     init {
-        api.registerListener(apiListener)
-    }
-
-    // Switch API if setting changed
-    private fun ensureCorrectApi() {
-        val shouldUseMock = Settings.withMockData()
-        val newApi =
-            if (shouldUseMock) HomeAssistantApiMock
-            else HomeAssistantApi
-
-        if (api !== newApi) {
-            api.deregisterListener(apiListener)
-            api = newApi
-            api.registerListener(apiListener)
-            notifyListeners()
+        // Mock data replaced externally (demo mode, tests) - reload if we're showing mock data
+        scope.launch {
+            HomeAssistantApiMock.changes.drop(1).collect {
+                if (api === HomeAssistantApiMock) refreshDevices()
+            }
         }
     }
 
-    // --- Listener management ---
-    private fun cleanupListeners() {
-        listeners.removeAll { it.get() == null }
-    }
+    // --- Public API ---
 
-    override fun registerListener(listener: HomeAssistantInterface.Listener) {
-        cleanupListeners()
-        if (listeners.none { it.get() == listener }) {
-            listeners.add(WeakReference(listener))
-        }
-    }
-
-    override fun deregisterListener(listener: HomeAssistantInterface.Listener) {
-        cleanupListeners()
-        listeners.removeAll { it.get() == listener || it.get() == null }
-    }
-
-    private fun notifyListeners() {
-        cleanupListeners()
-        listeners.forEach { it.get()?.onUpdate() }
-    }
-
-    // --- Fetch devices ---
-    override fun fetchAllLights(
-        refresh: Boolean,
+    /**
+     * Fetch devices and deliver them on the UI thread.
+     * On failure the last known devices are delivered.
+     * @param refresh if false and devices are already loaded, returns them without a request.
+     */
+    fun fetchAllLights(
+        refresh: Boolean = true,
         onResult: (List<HaDevice>) -> Unit
     ) {
-        ensureCorrectApi()
-
-        api.fetchAllLights(refresh) { devices ->
-            CoroutineScope(PlatformBridge.dispatchers.ioDispatcher()).launch {
-                // If using real API and saving is enabled → update mock storage
-                if (api === HomeAssistantApi && Settings.saveMockHaData) {
-                    HomeAssistantApiMock.populateMockData(devices)
-                }
-
-                coroutineScope {
-                    devices.map { device ->
-                        async { device.translate() }
-                    }.awaitAll()
-                }
-            }
-
-            CoroutineScope(PlatformBridge.dispatchers.uiDispatcher()).launch {
-                _devices.value = devices
-                onResult(devices)
-
-                if (refresh) {
-                    notifyListeners()
-                }
-
-                _loading.value = false
-            }
+        scope.launch {
+            val current = _devices.value
+            onResult(if (!refresh && current.isNotEmpty()) current else refreshDevices())
         }
     }
 
-    // --- Control lights ---
-    override fun turnOnLights(devices: List<HaDevice>, brightnessPct: Int?) {
-        ensureCorrectApi()
-        api.turnOnLights(devices, brightnessPct)
-    }
+    fun turnOnLights(devices: List<HaDevice>, brightnessPct: Int? = null) =
+        runCommand("turnOn") { it.turnOnLights(devices, brightnessPct) }
 
-    override fun turnOffLights(devices: List<HaDevice>) {
-        ensureCorrectApi()
-        api.turnOffLights(devices)
-    }
+    fun turnOffLights(devices: List<HaDevice>) =
+        runCommand("turnOff") { it.turnOffLights(devices) }
 
     fun registerUi(): Int {
         val token = nextToken++
         activeUiTokens.add(token)
-
-        if (activeUiTokens.size == 1) {
-            startPolling()
-        }
-
+        if (activeUiTokens.size == 1) startPolling()
         return token
     }
 
     fun unregisterUi(token: Int) {
-        val removed = activeUiTokens.remove(token)
-        if (!removed) return // ignore invalid / double calls
+        if (!activeUiTokens.remove(token)) return // ignore invalid / double calls
+        if (activeUiTokens.isEmpty()) stopPolling()
+    }
 
-        if (activeUiTokens.isEmpty()) {
-            stopPolling()
+    // --- Refresh logic ---
+
+    /**
+     * Fetch devices from the current API and publish them.
+     * On failure the last known devices are kept and returned.
+     */
+    private suspend fun refreshDevices(): List<HaDevice> {
+        val currentApi = api
+        return try {
+            currentApi.fetchAllLights().also { publish(currentApi, it) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Utils.logException(e, "Failed to fetch devices - keeping last known state")
+            _devices.value
+        } finally {
+            _loading.value = false
         }
     }
 
-    // --- Polling control ---
+    private fun publish(source: HomeAssistantInterface, devices: List<HaDevice>) {
+        _devices.value = devices
+
+        // Mirror real HA data into the mock (the mock only writes to disk when data changed)
+        if (source === HomeAssistantApi && Settings.saveMockHaData) {
+            HomeAssistantApiMock.populateMockData(devices)
+        }
+
+        scope.launch(PlatformBridge.dispatchers.ioDispatcher()) {
+            devices.map { device -> async { device.translate() } }.awaitAll()
+        }
+    }
+
+    private fun runCommand(name: String, command: suspend (HomeAssistantInterface) -> Unit) {
+        scope.launch {
+            try {
+                command(api)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Utils.logException(e, "HomeAssistant $name failed")
+            }
+            // Refresh even on failure so the UI reflects the real state
+            scheduleFollowUpRefreshes()
+        }
+    }
+
+    /**
+     * HA is sometimes slow to apply state changes, so refresh a few times after a command.
+     * A new command restarts the sequence.
+     */
+    private fun scheduleFollowUpRefreshes() {
+        followUpRefreshJob?.cancel()
+        followUpRefreshJob = scope.launch {
+            FOLLOW_UP_REFRESH_DELAYS_MS.forEach { delayMs ->
+                delay(delayMs)
+                refreshDevices()
+            }
+        }
+    }
+
+    // --- Polling ---
     private fun startPolling() {
-        if (pollingJob != null) return
+        if (pollingJob?.isActive == true) return
 
         pollingJob = scope.launch {
-            try {
-                while (isActive && activeUiTokens.isNotEmpty()) {
-                    _loading.value = true
-                    fetchAllLights(true) {}
-                    delay(pollingIterationMillis)
-                }
-            } finally {
-                // Allow restart later
-                pollingJob = null
+            while (isActive) {
+                _loading.value = true
+                refreshDevices()
+                delay(Settings.secondsForHaUpdateOnUi.coerceAtLeast(1) * 1000L)
             }
         }
     }
@@ -177,8 +172,12 @@ class HomeAssistantRepository private constructor() : HomeAssistantInterface {
     }
 
     companion object {
+        /** Delays between consecutive follow-up refreshes after a command. */
+        private val FOLLOW_UP_REFRESH_DELAYS_MS = listOf(0L, 5_000L)
+
         val instance: HomeAssistantRepository by lazy {
             HomeAssistantRepository()
         }
     }
 }
+

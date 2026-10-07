@@ -1,24 +1,17 @@
 package com.doronyg.mylightscontroller.ha
 
+/**
+ * Low-level access to Home Assistant (real or mock).
+ *
+ * Implementations are stateless request executors: no caching, no scheduling, no notifications.
+ * All functions throw on failure. Refresh logic and state live in [HomeAssistantRepository].
+ */
 interface HomeAssistantInterface {
-    // Listener for updates
-    interface Listener {
-        fun onUpdate()
-    }
-
-    // --- Listener management ---
-    fun registerListener(listener: Listener)
-    fun deregisterListener(listener: Listener)
-
-    // --- Fetch devices ---
-    /**
-     * Fetch all lights/switches from Home Assistant.
-     * @param refresh if false, may return cached data.
-     * @param onResult callback with the resulting devices.
-     */
-    fun fetchAllLights(refresh: Boolean = true, onResult: (List<HaDevice>) -> Unit)
+    /** Fetch all lights/switches. */
+    suspend fun fetchAllLights(): List<HaDevice>
 
     // --- Turn lights on/off ---
-    fun turnOnLights(devices: List<HaDevice>, brightnessPct: Int? = null)
-    fun turnOffLights(devices: List<HaDevice>)
+    suspend fun turnOnLights(devices: List<HaDevice>, brightnessPct: Int? = null)
+    suspend fun turnOffLights(devices: List<HaDevice>)
 }
+
