@@ -9,22 +9,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.BuildConfig
 import com.doronyg.mylightscontroller.Settings
+import com.doronyg.mylightscontroller.platform.android.AndroidEmailHelper
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.ui.navigator.Screen
 import com.doronyg.mylightscontroller.ui.navigator.UiEvent
-import com.doronyg.mylightscontroller.utils.EmailHelper
 import com.doronyg.mylightscontroller.utils.MockUtils.saveMockData
 
 @Composable
 fun SettingsScreen(
     onEvent: (UiEvent) -> Unit
 ) {
-    val context = LocalContext.current
-
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -48,9 +45,9 @@ fun SettingsScreen(
                 pref = Settings::withVoiceControllerService,
                 onToggle = { enabled ->
                     if (enabled) {
-                        PlatformBridge.voiceController.startService(context, boot = false)
+                        PlatformBridge.voiceController.startService(boot = false)
                     } else {
-                        PlatformBridge.voiceController.stopService(context)
+                        PlatformBridge.voiceController.stopService()
                     }
                 }
             )
@@ -98,7 +95,7 @@ fun SettingsScreen(
                 title = "Export data via email",
                 description = "Export lights JSON and send via email",
                 onClick = {
-                    EmailHelper.sendHaDataViaEmail(context.applicationContext)
+                    AndroidEmailHelper.sendHaDataViaEmail()
                 }
             )
         }
@@ -109,7 +106,7 @@ fun SettingsScreen(
                     title = "Export HA data (debug)",
                     description = "Write lights JSON to cache",
                     onClick = {
-                        saveMockData(context.applicationContext)
+                        saveMockData()
                     }
                 )
             }

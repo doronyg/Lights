@@ -1,50 +1,41 @@
 package com.doronyg.mylightscontroller.utils
 
-import android.content.Context
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
-import java.io.File
 
+/**
+ * Multiplatform mock data utilities.
+ * Platform-specific file I/O is delegated to PlatformBridge.mockDataProvider.
+ */
 object MockUtils {
 
-    private fun dispatchToMain(
-        onResult: ((File?) -> Unit)?,
-        result: File?
-    ) {
-        if (onResult == null) return
-
-        CoroutineScope(PlatformBridge.dispatchers.uiDispatcher()).launch {
-            onResult(result)
-        }
-    }
-
+    /**
+     * Save mock HA data using platform-specific file I/O.
+     * The callback receives the platform path of the written file (or null on failure)
+     * and is dispatched on the UI thread.
+     */
     fun saveMockData(
-        appContext: Context,
-        onResult: ((File?) -> Unit)? = null
+        onResult: ((String?) -> Unit)? = null
     ) {
+        val provider = PlatformBridge.mockDataProvider
+
         CoroutineScope(PlatformBridge.dispatchers.ioDispatcher()).launch {
             try {
                 HomeAssistantRepository.instance.fetchAllLights(
                     refresh = true
                 ) { lights ->
-
-                    val resultFile: File? = try {
+                    val resultPath: String? = try {
                         val jsonString = JsonUtils.json.encodeToString(lights)
-
-                        val file = File(appContext.cacheDir, "ha_lights.json")
-                        file.writeText(jsonString)
-
-                        Utils.log("HA export written to: ${file.absolutePath}")
-                        file
+                        provider.writeFile("ha_lights.json", jsonString)
                     } catch (e: Exception) {
                         Utils.logException(e, "Failed to write HA data")
                         null
                     }
-                    dispatchToMain(onResult, resultFile)
+                    dispatchToMain(onResult, resultPath)
                 }
             } catch (e: Exception) {
                 Utils.logException(e, "Failed to fetch HA data")
@@ -53,18 +44,30 @@ object MockUtils {
         }
     }
 
-
-    fun loadMockDevices(context: Context): List<HaDevice> {
+    /**
+     * Load mock devices from platform-specific storage.
+     * Platform-specific asset/file access is delegated to the provider.
+     */
+    fun loadMockDevices(): List<HaDevice> {
         return try {
-            val jsonString = context.assets
-                .open("ha_lights_demo.json")
-                .bufferedReader()
-                .use { it.readText() }
-
+            val jsonString = PlatformBridge.mockDataProvider.readAssetFile("ha_lights_demo.json")
             JsonUtils.json.decodeFromString<List<HaDevice>>(jsonString)
         } catch (e: Exception) {
             Utils.logException(e, "Failed to load mock data")
             emptyList()
         }
     }
+
+    private fun dispatchToMain(
+        onResult: ((String?) -> Unit)?,
+        result: String?
+    ) {
+        if (onResult == null) return
+
+        CoroutineScope(PlatformBridge.dispatchers.uiDispatcher()).launch {
+            onResult(result)
+        }
+    }
 }
+
+

@@ -1,4 +1,4 @@
-package com.doronyg.mylightscontroller.onboarding.ui
+package com.doronyg.mylightscontroller.ui.onboarding
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
@@ -21,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.ui.SettingsActionCard
@@ -29,6 +28,7 @@ import com.doronyg.mylightscontroller.ui.SettingsTextField
 import com.doronyg.mylightscontroller.ui.SimpleTopBar
 import com.doronyg.mylightscontroller.ui.lightOnColors
 import com.doronyg.mylightscontroller.utils.Utils
+import io.ktor.http.Url
 
 @Composable
 fun ManualSetupScreen(
@@ -51,16 +51,20 @@ fun ManualSetupScreen(
     fun validateUrl(value: String): String? {
         if (value.isBlank()) return "URL is required"
 
+        // Ktor's parser defaults a missing scheme to http, so check the raw string first
+        if (!value.startsWith("http://") && !value.startsWith("https://")) {
+            return "Must start with http or https"
+        }
+
         val uri = try {
-            value.toUri()
+            Url(value)
         } catch (e: Exception) {
             Utils.logException(e, "ManualSetupScreen validation failed")
             return "Invalid URL"
         }
 
         return when {
-            uri.scheme !in listOf("http", "https") -> "Must start with http or https"
-            uri.host.isNullOrBlank() -> "Invalid host"
+            uri.host.isBlank() -> "Invalid host"
             else -> null
         }
     }
@@ -191,3 +195,4 @@ fun ManualSetupScreen(
         )
     }
 }
+

@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.doronyg.mylightscontroller.platform.common.IPlatformPreferences
 import com.doronyg.mylightscontroller.utils.StringCodec
-import com.doronyg.mylightscontroller.utils.Utils
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -20,10 +19,10 @@ object AndroidPlatformPreferences : IPlatformPreferences {
     private const val TRANSLATION_PREF_NAME = "translations"
 
     private val appPrefs: SharedPreferences?
-        get() = Utils.appContext?.getSharedPreferences(APP_PREF_NAME, android.content.Context.MODE_PRIVATE)
+        get() = AndroidUtils.appContext?.getSharedPreferences(APP_PREF_NAME, android.content.Context.MODE_PRIVATE)
 
     private val translationPrefs: SharedPreferences?
-        get() = Utils.appContext?.getSharedPreferences(TRANSLATION_PREF_NAME, android.content.Context.MODE_PRIVATE)
+        get() = AndroidUtils.appContext?.getSharedPreferences(TRANSLATION_PREF_NAME, android.content.Context.MODE_PRIVATE)
 
     /**
      * Get SharedPreferences for app settings.

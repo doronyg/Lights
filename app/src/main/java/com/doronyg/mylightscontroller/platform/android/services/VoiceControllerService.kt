@@ -32,6 +32,7 @@ import com.doronyg.mylightscontroller.ha.DeviceType
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
 import com.doronyg.mylightscontroller.platform.android.ui.MainActivity
+import com.doronyg.mylightscontroller.platform.android.AndroidUtils
 import com.doronyg.mylightscontroller.utils.Utils
 
 class VoiceControllerService : Service() {
@@ -69,7 +70,7 @@ class VoiceControllerService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        Utils.appContext = applicationContext
+        AndroidUtils.appContext = applicationContext
         Utils.post({createDependencies()}, if (createdByBoot == true) 30000 else 0)
         Utils.log( "VoiceControllerService created")
     }

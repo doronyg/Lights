@@ -24,8 +24,8 @@ import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.onboarding.models.AppConfig
 import com.doronyg.mylightscontroller.onboarding.models.HaSetupPayload.Companion.parseSetupDeepLinkSafe
-import com.doronyg.mylightscontroller.onboarding.ui.ManualSetupScreen
-import com.doronyg.mylightscontroller.onboarding.ui.OnboardingScreen
+import com.doronyg.mylightscontroller.ui.onboarding.ManualSetupScreen
+import com.doronyg.mylightscontroller.ui.onboarding.OnboardingScreen
 import com.doronyg.mylightscontroller.ui.navigator.AppNavigator
 import com.doronyg.mylightscontroller.ui.navigator.Screen
 import com.doronyg.mylightscontroller.ui.navigator.Screen.*

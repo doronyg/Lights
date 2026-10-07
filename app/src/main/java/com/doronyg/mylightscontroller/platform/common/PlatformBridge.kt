@@ -1,5 +1,7 @@
 package com.doronyg.mylightscontroller.platform.common
 
+import io.ktor.client.engine.HttpClientEngineConfig
+import io.ktor.client.engine.HttpClientEngineFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -21,6 +23,10 @@ object PlatformBridge {
     lateinit var logger: IPlatformLogger
     lateinit var permissions: IPlatformPermissions
     lateinit var dispatchers: IPlatformDispatchers
+    lateinit var mockDataProvider: IPlatformMockDataProvider
+
+    /** Ktor HTTP engine for this platform (e.g. OkHttp on Android, Js on web). */
+    lateinit var httpEngine: HttpClientEngineFactory<HttpClientEngineConfig>
 
     /**
      * Permission results map - tracks all requested permissions and their grant status.

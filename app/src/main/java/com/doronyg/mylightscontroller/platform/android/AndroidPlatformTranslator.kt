@@ -1,6 +1,5 @@
 package com.doronyg.mylightscontroller.platform.android
 
-import android.content.Context
 import androidx.core.content.edit
 import com.doronyg.mylightscontroller.platform.common.IPlatformTranslator
 import com.doronyg.mylightscontroller.utils.Utils
@@ -10,6 +9,7 @@ import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.Translator
 import com.google.mlkit.nl.translate.TranslatorOptions
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.Locale
 import kotlin.coroutines.resumeWithException
 
 /**
@@ -24,12 +24,11 @@ object AndroidPlatformTranslator : IPlatformTranslator {
     private var translator: Translator? = null
     private var targetLanguage: String = ""
 
-    private val appContext: Context
-        get() = Utils.appContext ?: throw IllegalStateException("AppTranslator not initialized. Call AppTranslator.init(context) first.")
-
     private val prefs by lazy {
         AndroidPlatformPreferences.getTranslationPreferences()
     }
+
+    override fun deviceLanguage(): String = Locale.getDefault().language
 
     override suspend fun initializeTranslator(language: String) {
         if (translator != null) return

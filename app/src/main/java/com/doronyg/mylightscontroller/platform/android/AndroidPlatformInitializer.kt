@@ -1,6 +1,8 @@
 package com.doronyg.mylightscontroller.platform.android
 
+import android.content.Context
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
+import io.ktor.client.engine.okhttp.OkHttp
 
 /**
  * Initializes all Android platform implementations for the PlatformBridge.
@@ -9,7 +11,8 @@ import com.doronyg.mylightscontroller.platform.common.PlatformBridge
  * before any platform services are accessed.
  */
 object AndroidPlatformInitializer {
-    fun initialize() {
+    fun initialize(context: Context) {
+        // Initialize platform bridge services
         PlatformBridge.preferences = AndroidPlatformPreferences
         PlatformBridge.translator = AndroidPlatformTranslator
         PlatformBridge.voiceController = AndroidPlatformVoiceController
@@ -17,6 +20,11 @@ object AndroidPlatformInitializer {
         PlatformBridge.logger = AndroidPlatformLogger
         PlatformBridge.permissions = AndroidPlatformPermissions
         PlatformBridge.dispatchers = AndroidPlatformDispatchers()
+        PlatformBridge.mockDataProvider = AndroidMockDataProvider
+        PlatformBridge.httpEngine = OkHttp
+
+        // Initialize platform implementations that need context
+        AndroidPlatformVoiceController.initialize(context)
     }
 }
 

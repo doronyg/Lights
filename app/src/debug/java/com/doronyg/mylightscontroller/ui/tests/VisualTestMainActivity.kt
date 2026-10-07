@@ -8,9 +8,9 @@ import androidx.core.view.WindowInsetsCompat
 import com.doronyg.mylightscontroller.R
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.ha.mock.HomeAssistantApiMock
-import com.doronyg.mylightscontroller.onboarding.ui.applyDemoConfig
+import com.doronyg.mylightscontroller.onboarding.applyDemoConfig
+import com.doronyg.mylightscontroller.platform.android.AndroidUtils
 import com.doronyg.mylightscontroller.utils.MockUtils
-import com.doronyg.mylightscontroller.utils.Utils
 
 /**
  * Test version of MainActivity for visual regression testing.
@@ -28,7 +28,7 @@ class VisualTestMainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // Initialize context FIRST
-        Utils.appContext = applicationContext
+        AndroidUtils.appContext = applicationContext
 
         // Set up mock data directly (avoid applyDemoConfig circular initialization)
         Settings.useMockHaData = true
@@ -37,7 +37,7 @@ class VisualTestMainActivity : AppCompatActivity() {
         applyDemoConfig()
 
         // Populate mock data
-        HomeAssistantApiMock.populateMockData(MockUtils.loadMockDevices(applicationContext))
+        HomeAssistantApiMock.populateMockData(MockUtils.loadMockDevices())
 
         // Set up UI without requiring permissions
         enableEdgeToEdge()

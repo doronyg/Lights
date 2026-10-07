@@ -1,4 +1,4 @@
-package com.doronyg.mylightscontroller.onboarding.ui
+package com.doronyg.mylightscontroller.ui.onboarding
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,13 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.doronyg.mylightscontroller.Config
-import com.doronyg.mylightscontroller.Settings
-import com.doronyg.mylightscontroller.ha.mock.HomeAssistantApiMock
+import com.doronyg.mylightscontroller.onboarding.applyDemoConfig
 import com.doronyg.mylightscontroller.ui.SettingsActionCard
 import com.doronyg.mylightscontroller.ui.SimpleTopBar
-import com.doronyg.mylightscontroller.utils.MockUtils
-import com.doronyg.mylightscontroller.utils.Utils
 
 @Composable
 fun OnboardingScreen(
@@ -65,17 +61,3 @@ fun OnboardingScreen(
     }
 }
 
-fun applyDemoConfig() {
-    Config.homeAssistantUrl = "http://demo.local"
-    Config.homeAssistantToken = "demo-token"
-//    Config.PORCUPINE_API_KEY = "demo-key"
-
-    Settings.useMockHaData = true
-    Settings.isConfigured = true
-    Settings.saveMockHaData = true
-
-    Utils.appContext?.let {
-        HomeAssistantApiMock.populateMockData(MockUtils.loadMockDevices(it))
-    }
-
-}

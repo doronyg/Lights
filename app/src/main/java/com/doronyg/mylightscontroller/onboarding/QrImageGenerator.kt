@@ -1,7 +1,5 @@
 package com.doronyg.mylightscontroller.onboarding
 
-import android.graphics.Color.BLACK
-import android.graphics.Color.WHITE
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
@@ -14,6 +12,10 @@ import kotlinx.coroutines.withContext
  * Platform-specific rendering (Bitmap, Canvas, etc.) is handled by the caller.
  */
 object QrImageGenerator {
+
+    // ARGB color constants
+    private const val BLACK = 0xFF000000.toInt()  // ARGB: fully opaque black
+    private const val WHITE = 0xFFFFFFFF.toInt()  // ARGB: fully opaque white
 
     /**
      * Generate QR code pixel data.

@@ -1,8 +1,9 @@
 package com.doronyg.mylightscontroller.onboarding.models
 
-import android.net.Uri
-import androidx.core.net.toUri
 import com.doronyg.mylightscontroller.utils.Utils
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
+import io.ktor.http.Url
 
 data class HaSetupPayload(
     val appVersion: Int = 1,
@@ -11,28 +12,31 @@ data class HaSetupPayload(
     val porcupineKey: String? = null
 ) {
     companion object {
+        private const val SCHEME = "mylightscontroller"
+        private const val HOST = "setup"
+
         fun buildSetupDeepLink(payload: HaSetupPayload): String {
-            return Uri.Builder()
-                .scheme("mylightscontroller")
-                .authority("setup")
-                .appendQueryParameter("haUrl", payload.haUrl)
-                .appendQueryParameter("haToken", payload.haToken)
-                .appendQueryParameter("porcupineKey", payload.porcupineKey)
-                .build()
-                .toString()
+            return URLBuilder(
+                protocol = URLProtocol(SCHEME, 0),
+                host = HOST
+            ).apply {
+                parameters.append("haUrl", payload.haUrl)
+                parameters.append("haToken", payload.haToken)
+                parameters.append("porcupineKey", payload.porcupineKey ?: "")
+            }.buildString()
         }
 
         fun parseSetupDeepLinkSafe(url: String): HaSetupPayload? {
             return try {
-                val uri = url.toUri()
+                val uri = Url(url)
 
-                if (uri.scheme != "mylightscontroller" || uri.authority != "setup") {
+                if (uri.protocol.name != SCHEME || uri.host != HOST) {
                     return null
                 }
 
-                val haUrl = uri.getQueryParameter("haUrl") ?: return null
-                val haToken = uri.getQueryParameter("haToken") ?: return null
-                val porcupineKey = uri.getQueryParameter("porcupineKey") ?: return null
+                val haUrl = uri.parameters["haUrl"] ?: return null
+                val haToken = uri.parameters["haToken"] ?: return null
+                val porcupineKey = uri.parameters["porcupineKey"] ?: return null
 
                 HaSetupPayload(
                     haUrl = haUrl,

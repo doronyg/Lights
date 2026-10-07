@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.Locale
 
 /**
  * Multiplatform translator facade.
@@ -23,7 +22,7 @@ object AppTranslator {
     private val initMutex = Mutex()
 
     private val targetLanguage: String by lazy {
-        Locale.getDefault().language
+        PlatformBridge.translator.deviceLanguage()
     }
 
     private val isEnglish: Boolean by lazy {

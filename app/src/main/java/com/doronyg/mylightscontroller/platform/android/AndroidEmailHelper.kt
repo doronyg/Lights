@@ -1,26 +1,37 @@
-package com.doronyg.mylightscontroller.utils
+package com.doronyg.mylightscontroller.platform.android
 
-import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
+import com.doronyg.mylightscontroller.utils.MockUtils
+import com.doronyg.mylightscontroller.utils.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
 
-object EmailHelper {
+/**
+ * Android-specific email helper.
+ * Sends files via Android Intent.ACTION_SEND.
+ * Context is obtained from AndroidUtils (initialized at app startup).
+ */
+object AndroidEmailHelper {
 
-    fun sendHaDataViaEmail(appContext: Context) {
-        MockUtils.saveMockData(appContext) { file ->
-            if (file != null) {
-                sendFileViaEmail(appContext, file)
+    fun sendHaDataViaEmail() {
+        MockUtils.saveMockData { path ->
+            if (path != null) {
+                sendFileViaEmail(File(path))
             } else {
                 Utils.log("No file generated, skipping email")
             }
         }
     }
 
-    private fun sendFileViaEmail(appContext: Context, file: File) {
+    private fun sendFileViaEmail(file: File) {
+        val appContext = AndroidUtils.appContext ?: run {
+            Utils.log("appContext not available for email")
+            return
+        }
+
         CoroutineScope(PlatformBridge.dispatchers.uiDispatcher()).launch {
             try {
                 val uri = FileProvider.getUriForFile(
@@ -52,3 +63,7 @@ object EmailHelper {
         }
     }
 }
+
+
+
+

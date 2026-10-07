@@ -4,7 +4,7 @@ import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
@@ -17,7 +17,6 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 object NetworkUtils {
     object HttpMethod {
@@ -27,15 +26,12 @@ object NetworkUtils {
         const val DELETE = "DELETE"
     }
 
-    // Single Ktor HttpClient instance with OkHttp engine for Android
+    // Single Ktor HttpClient; the engine is supplied by the platform layer
     val httpClient: HttpClient by lazy {
-        HttpClient(OkHttp) {
-            engine {
-                config {
-                    connectTimeout(10, TimeUnit.SECONDS)
-                    readTimeout(15, TimeUnit.SECONDS)
-                    writeTimeout(15, TimeUnit.SECONDS)
-                }
+        HttpClient(PlatformBridge.httpEngine) {
+            install(HttpTimeout) {
+                connectTimeoutMillis = 10_000
+                socketTimeoutMillis = 15_000
             }
 
             install(ContentNegotiation) {

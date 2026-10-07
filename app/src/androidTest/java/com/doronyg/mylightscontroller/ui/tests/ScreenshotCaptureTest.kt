@@ -2,7 +2,6 @@ package com.doronyg.mylightscontroller.ui.tests
 
 import android.app.Activity
 import android.content.Context
-import android.os.Environment
 import android.util.Log
 import android.view.View
 import androidx.test.core.app.ActivityScenario
@@ -10,7 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
 import androidx.test.runner.lifecycle.Stage
-import com.doronyg.mylightscontroller.utils.Utils
+import com.doronyg.mylightscontroller.platform.android.AndroidUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -18,8 +17,6 @@ import kotlinx.coroutines.withContext
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
-import java.io.FileOutputStream
 
 private const val TAG = "ScreenshotCaptureTest"
 private const val WAIT_TIMEOUT_MILLIS = 60000L // 60 seconds timeout
@@ -48,13 +45,13 @@ class ScreenshotCaptureTest {
     private val context: Context
         get() = activityContext ?: InstrumentationRegistry.getInstrumentation().targetContext
 
-    @Before
-    fun setupTest() {
-        // Set app context FIRST so Settings can access SharedPreferences
-        Utils.appContext = InstrumentationRegistry.getInstrumentation().targetContext
+     @Before
+     fun setupTest() {
+         // Set app context FIRST so Settings can access SharedPreferences
+         AndroidUtils.appContext = InstrumentationRegistry.getInstrumentation().targetContext
 
-        Log.d(TAG, "Test setup: Utils.appContext set")
-        Log.d(TAG, "App context package: ${Utils.appContext?.packageName}")
+         Log.d(TAG, "Test setup: AndroidUtils.appContext set")
+         Log.d(TAG, "App context package: ${AndroidUtils.appContext?.packageName}")
 
         // Clear any previous stop signal
         ScreenshotUtils.clearStopSignal(context)
