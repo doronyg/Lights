@@ -5,10 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.PowerOff
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -22,7 +18,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.Config
@@ -37,12 +32,6 @@ import com.doronyg.mylightscontroller.ui.navigator.Screen.*
 import com.doronyg.mylightscontroller.ui.navigator.UiEvent.*
 import com.doronyg.mylightscontroller.utils.AppTranslator
 
-// --- Tabs ---
-enum class BottomTab(val title: String, val icon: ImageVector) {
-    Main("Main", Icons.Default.Lightbulb),
-    Unavailable("Unavailable", Icons.Default.PowerOff),
-    Settings("Settings", Icons.Default.Settings)
-}
 
 @Composable
 fun MainScreen(
@@ -62,7 +51,8 @@ fun MainScreen(
         }
     }
 
-    val canGoBack = navigator.stack.size > 1
+    val stackList by navigator.stack.collectAsState()
+    val canGoBack = stackList.size > 1
 
     BackHandler(enabled = canGoBack) {
         navigator.handle(NavigateBack)
@@ -92,7 +82,7 @@ fun MainScreen(
                             onClick = {
                                 navigator.setRoot(Screen.Tab(tab))
                             },
-                            icon = { Icon(tab.icon, contentDescription = title) },
+                            icon = { Icon(tab.getIcon(), contentDescription = title) },
                             label = if (showLabels) {
                                 { Text(title, maxLines = 1, softWrap = false) }
                             } else null

@@ -1,120 +1,114 @@
 package com.doronyg.mylightscontroller.ha
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bathtub
-import androidx.compose.material.icons.filled.Bed
-import androidx.compose.material.icons.filled.ChildCare
-import androidx.compose.material.icons.filled.Deck
-import androidx.compose.material.icons.filled.Devices
-import androidx.compose.material.icons.filled.DoorFront
-import androidx.compose.material.icons.filled.Garage
-import androidx.compose.material.icons.filled.Kitchen
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.LocalLaundryService
-import androidx.compose.material.icons.filled.Power
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Router
-import androidx.compose.material.icons.filled.Thermostat
-import androidx.compose.material.icons.filled.ToggleOn
-import androidx.compose.material.icons.filled.Wc
-import androidx.compose.material.icons.filled.Weekend
-import androidx.compose.ui.graphics.vector.ImageVector
-import com.doronyg.mylightscontroller.ui.icons.Basement
-
+/**
+ * Platform-agnostic icon resolver.
+ * Resolves device names to HaIcon without any platform-specific dependencies.
+ * This API is KMP-safe and works in commonMain.
+ *
+ * For Compose-specific icon rendering (ImageVector), use the Android extension functions in androidMain:
+ * - HaIcon.toImageVector()
+ * - HaDevice.getDeviceIcon()
+ */
 object HaIconResolver {
 
     private data class IconRule(
-        val icon: ImageVector,
+        val icon: HaIcon,
         val keywords: List<String>
     )
 
     private val rules = listOf(
 
         IconRule(
-            Icons.Default.Bathtub,
+            HaIcon.BATHTUB,
             listOf("bath")
         ),
 
         IconRule(
-            Icons.Default.Wc,
+            HaIcon.WC,
             listOf( "washroom", "toilet", "restroom")
         ),
 
         IconRule(
-            Icons.Default.Bed,
+            HaIcon.BEDROOM,
             listOf("bedroom", "master", "guest", "child", "kids", "nursery")
         ),
 
         IconRule(
-            Icons.Default.Kitchen,
+            HaIcon.KITCHEN,
             listOf("kitchen", "cook", "oven", "pantry")
         ),
 
         IconRule(
-            Icons.Default.Restaurant,
+            HaIcon.RESTAURANT,
             listOf("dining", "dinner", "breakfast")
         ),
 
         IconRule(
-            Icons.Default.Weekend,
+            HaIcon.LIVING_ROOM,
             listOf("living", "family", "lounge")
         ),
 
         IconRule(
-            Basement,
+            HaIcon.BASEMENT,
             listOf("basement", "cellar", "stairs")
         ),
 
         IconRule(
-            Icons.Default.ChildCare,
+            HaIcon.PLAYROOM,
             listOf("play", "game", "toy")
         ),
 
         IconRule(
-            Icons.Default.Deck,
+            HaIcon.PATIO,
             listOf("porch", "patio", "deck", "balcony")
         ),
 
         IconRule(
-            Icons.Default.DoorFront,
+            HaIcon.MUDROOM,
             listOf("mud", "entry", "hall", "foyer")
         ),
 
         IconRule(
-            Icons.Default.LocalLaundryService,
+            HaIcon.LAUNDRY,
             listOf("laundry", "washer", "dryer")
         ),
 
         IconRule(
-            Icons.Default.Garage,
+            HaIcon.GARAGE,
             listOf("garage", "carport")
         ),
 
         IconRule(
-            Icons.Default.Lightbulb,
+            HaIcon.LIGHTBULB,
             listOf("lamp", "light")
         ),
 
         IconRule(
-            Icons.Default.Power,
+            HaIcon.POWER,
             listOf("plug", "outlet", "socket")
         ),
 
         IconRule(
-            Icons.Default.Router,
+            HaIcon.ROUTER,
             listOf("router", "wifi", "network")
         ),
 
         IconRule(
-            Icons.Default.Thermostat,
+            HaIcon.THERMOSTAT,
             listOf("thermostat", "climate", "temperature", "hvac")
         )
     )
 
-    fun resolve(device: HaDevice): ImageVector {
-
+    /**
+     * Resolves a device to a platform-agnostic HaIcon.
+     * This is the primary KMP-safe API.
+     *
+     * @param device The device to resolve
+     * @return HaIcon representing the device type
+     */
+    fun resolve(device: HaDevice): HaIcon {
         if (device.state == "unavailable") {
-            return Icons.Default.Devices
+            return HaIcon.DEVICES
         }
 
         val name = normalize(device.englishName)
@@ -135,11 +129,11 @@ object HaIconResolver {
         }
     }
 
-    private fun fallback(device: HaDevice): ImageVector {
+    private fun fallback(device: HaDevice): HaIcon {
         return when (device.type) {
-            DeviceType.LIGHT -> Icons.Default.Lightbulb
-            DeviceType.SWITCH -> Icons.Default.ToggleOn
-            DeviceType.OTHER -> Icons.Default.Devices
+            DeviceType.LIGHT -> HaIcon.LIGHTBULB
+            DeviceType.SWITCH -> HaIcon.SWITCH
+            DeviceType.OTHER -> HaIcon.DEVICES
         }
     }
 
