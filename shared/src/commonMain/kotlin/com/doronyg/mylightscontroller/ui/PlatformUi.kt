@@ -1,8 +1,13 @@
 package com.doronyg.mylightscontroller.ui
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.platform.common.IPlatformQrScanner
 
 /**
@@ -22,6 +27,23 @@ interface PlatformUi {
     /** Creates (and remembers) the platform QR scanner for the current screen. */
     @Composable
     fun rememberQrScanner(): PlatformQrScanner
+
+    /*
+     * Visible vertical scrollbars for pointer-driven platforms (desktop, web).
+     * Default: none (touch platforms show their own scroll indicators / don't need one).
+     */
+
+    /** Space reserved on the right of scrollable content for the scrollbar (0 = none). */
+    val scrollbarGutter: Dp get() = 0.dp
+
+    @Composable
+    fun VerticalScrollbar(state: ScrollState, modifier: Modifier) {}
+
+    @Composable
+    fun VerticalScrollbar(state: LazyListState, modifier: Modifier) {}
+
+    @Composable
+    fun VerticalScrollbar(state: LazyGridState, modifier: Modifier) {}
 }
 
 /** A platform QR scanner together with the composable that shows its camera preview. */

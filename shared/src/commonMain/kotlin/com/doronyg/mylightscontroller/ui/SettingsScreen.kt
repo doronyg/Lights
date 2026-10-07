@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,94 +22,103 @@ import com.doronyg.mylightscontroller.utils.MockUtils.saveMockData
 fun SettingsScreen(
     onEvent: (UiEvent) -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Top,
-        contentPadding = PaddingValues(vertical = 16.dp)
-    ) {
+    val listState = rememberLazyListState()
 
-        item {
-            Text(
-                text = "Settings",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+    WithVerticalScrollbar(listState, Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.Top,
+            contentPadding = PaddingValues(vertical = 16.dp)
+        ) {
+            settingsItems(onEvent)
         }
+    }
+}
 
-        item {
-            SettingsSwitch(
-                title = "Voice Controller Service",
-                description = "Enable background voice detection service",
-                pref = Settings::withVoiceControllerService,
-                onToggle = { enabled ->
-                    if (enabled) {
-                        PlatformBridge.voiceController.start()
-                    } else {
-                        PlatformBridge.voiceController.stop()
-                    }
+private fun LazyListScope.settingsItems(onEvent: (UiEvent) -> Unit) {
+
+    item {
+        Text(
+            text = "Settings",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+    }
+
+    item {
+        SettingsSwitch(
+            title = "Voice Controller Service",
+            description = "Enable background voice detection service",
+            pref = Settings::withVoiceControllerService,
+            onToggle = { enabled ->
+                if (enabled) {
+                    PlatformBridge.voiceController.start()
+                } else {
+                    PlatformBridge.voiceController.stop()
                 }
-            )
-        }
-
-        item {
-            SettingsIntSlider(
-                title = "HA refresh interval",
-                description = "How often lights are refreshed while UI is visible",
-                pref = Settings::secondsForHaUpdateOnUi,
-                min = 5,
-                max = 300,
-                suffix = "s"
-            )
-        }
-
-        item {
-            SettingsSwitch(
-                title = "Save mock HA data",
-                description = "Save the last Home Assistant data locally for testing",
-                pref = Settings::saveMockHaData
-            )
-        }
-
-        item {
-            SettingsSwitch(
-                title = "Use mock HA data",
-                description = "Use saved Home Assistant data instead of the network",
-                pref = Settings::useMockHaData
-            )
-        }
-
-        item {
-            SettingsActionCard(
-                title = "Show Setup QR",
-                description = "Scan from another device to copy your setup",
-                onClick = {
-                    onEvent(UiEvent.NavigateTo(Screen.SetupQr))
-                }
-            )
-        }
-
-        item {
-            SettingsActionCard(
-                title = "Export data via email",
-                description = "Export lights JSON and send via email",
-                onClick = {
-                    PlatformBridge.dataExporter.exportHaData()
-                }
-            )
-        }
-
-        if (PlatformBridge.defaultConfig.isDebug) {
-            item {
-                SettingsActionCard(
-                    title = "Export HA data (debug)",
-                    description = "Write lights JSON to cache",
-                    onClick = {
-                        saveMockData()
-                    }
-                )
             }
+        )
+    }
+
+    item {
+        SettingsIntSlider(
+            title = "HA refresh interval",
+            description = "How often lights are refreshed while UI is visible",
+            pref = Settings::secondsForHaUpdateOnUi,
+            min = 5,
+            max = 300,
+            suffix = "s"
+        )
+    }
+
+    item {
+        SettingsSwitch(
+            title = "Save mock HA data",
+            description = "Save the last Home Assistant data locally for testing",
+            pref = Settings::saveMockHaData
+        )
+    }
+
+    item {
+        SettingsSwitch(
+            title = "Use mock HA data",
+            description = "Use saved Home Assistant data instead of the network",
+            pref = Settings::useMockHaData
+        )
+    }
+
+    item {
+        SettingsActionCard(
+            title = "Show Setup QR",
+            description = "Scan from another device to copy your setup",
+            onClick = {
+                onEvent(UiEvent.NavigateTo(Screen.SetupQr))
+            }
+        )
+    }
+
+    item {
+        SettingsActionCard(
+            title = "Export data via email",
+            description = "Export lights JSON and send via email",
+            onClick = {
+                PlatformBridge.dataExporter.exportHaData()
+            }
+        )
+    }
+
+    if (PlatformBridge.defaultConfig.isDebug) {
+        item {
+            SettingsActionCard(
+                title = "Export HA data (debug)",
+                description = "Write lights JSON to cache",
+                onClick = {
+                    saveMockData()
+                }
+            )
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.doronyg.mylightscontroller.ui.onboarding
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -11,6 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.onboarding.applyDemoConfig
+import com.doronyg.mylightscontroller.ui.ScrollableColumn
 import com.doronyg.mylightscontroller.ui.SettingsActionCard
 import com.doronyg.mylightscontroller.ui.SimpleTopBar
 import kotlinx.coroutines.launch
@@ -24,7 +24,7 @@ fun OnboardingScreen(
 ) {
     val scope = rememberCoroutineScope()
 
-    Column(
+    ScrollableColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)

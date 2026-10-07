@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -44,40 +45,44 @@ fun DeviceGrid(
 
         val horizontalPadding = if (columnCount == 1) 4.dp else 8.dp
         val spacing = if (columnCount == 1) 6.dp else 12.dp
+        val gridState = rememberLazyGridState()
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(columnCount),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = horizontalPadding),
-            horizontalArrangement = Arrangement.spacedBy(spacing),
-            verticalArrangement = Arrangement.spacedBy(spacing),
-            contentPadding = PaddingValues(vertical = spacing)
-        ) {
-            items(
-                items = devices,
-                key = { it.entityId },
-                span = { device ->
-                    if (device.dimmable && device.isOn)
-                        GridItemSpan(columnCount)   // full width dynamically
-                    else
-                        GridItemSpan(1)
-                }
-            ) { device ->
-                DeviceRow(
-                    device = device,
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        if (device.isOn) {
-                            stateHolder.turnOff(listOf(device))
-                        } else {
-                            stateHolder.turnOn(listOf(device))
-                        }
-                    },
-                    onBrightnessChange = { newBrightness ->
-                        stateHolder.turnOn(listOf(device), newBrightness)
+        WithVerticalScrollbar(gridState, Modifier.fillMaxSize()) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columnCount),
+                state = gridState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = horizontalPadding),
+                horizontalArrangement = Arrangement.spacedBy(spacing),
+                verticalArrangement = Arrangement.spacedBy(spacing),
+                contentPadding = PaddingValues(vertical = spacing)
+            ) {
+                items(
+                    items = devices,
+                    key = { it.entityId },
+                    span = { device ->
+                        if (device.dimmable && device.isOn)
+                            GridItemSpan(columnCount)   // full width dynamically
+                        else
+                            GridItemSpan(1)
                     }
-                )
+                ) { device ->
+                    DeviceRow(
+                        device = device,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            if (device.isOn) {
+                                stateHolder.turnOff(listOf(device))
+                            } else {
+                                stateHolder.turnOn(listOf(device))
+                            }
+                        },
+                        onBrightnessChange = { newBrightness ->
+                            stateHolder.turnOn(listOf(device), newBrightness)
+                        }
+                    )
+                }
             }
         }
     }

@@ -43,9 +43,12 @@ fun MyTheme(
 }
 
 
+/** The app's signature "light on" yellow. */
+val AppYellow = Color(0xFFF2C94C)
+
 @Composable
 fun lightOnColors(): Pair<Color, Color> = if (isSystemInDarkTheme()) {
-    Color(0xFFF2C94C) to Color(0xFF5C3D00)
+    AppYellow to Color(0xFF5C3D00)
 } else {
     Color(0xFFFFE9A3) to Color(0xFF5C4400)
 }

@@ -23,4 +23,4 @@ dependencyResolutionManagement {
 rootProject.name = "My Lights Controller"
 include(":app")
 include(":shared")
- 
+include(":desktopApp")

@@ -2,6 +2,9 @@
 .gradle/
 build/
 
+# Kotlin Gradle plugin (2.x) project-local state: sessions, error reports, KMP metadata
+.kotlin/
+
 # Local configuration file (sdk path, etc)
 local.properties
 

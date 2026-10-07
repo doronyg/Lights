@@ -22,6 +22,8 @@ kotlin {
         withHostTest {}
     }
 
+    jvm() // Desktop (Compose Desktop, see :desktopApp)
+
     sourceSets {
         commonMain.dependencies {
             // `api`: these types appear in the module's public API (StateFlow, HttpClient, Json, ...)
@@ -48,6 +50,7 @@ kotlin {
         }
     }
 }
+
 
 
 
