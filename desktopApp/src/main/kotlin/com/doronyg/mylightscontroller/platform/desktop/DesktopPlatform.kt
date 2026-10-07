@@ -48,13 +48,21 @@ import java.util.Properties
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-/** App data directory: ~/.mylightscontroller (owner-only access: it holds the HA token). */
-internal val appDir: File = File(System.getProperty("user.home"), ".mylightscontroller").apply {
+/**
+ * App data directory (holds the HA token, so owner-only where supported):
+ * - Windows: %APPDATA%\Lights (per-user and private by default)
+ * - macOS/Linux: ~/.mylightscontroller
+ */
+internal val appDir: File = run {
+    val appData = System.getenv("APPDATA")
+    if (System.getProperty("os.name").startsWith("Windows") && appData != null) File(appData, "Lights")
+    else File(System.getProperty("user.home"), ".mylightscontroller")
+}.apply {
     mkdirs()
     restrictToOwner(this, "rwx------")
 }
 
-/** Best effort: POSIX file systems only (macOS/Linux); a no-op elsewhere. */
+/** Best effort: POSIX file systems only (macOS/Linux). On Windows, %APPDATA% is already per-user. */
 internal fun restrictToOwner(file: File, permissions: String) {
     runCatching { Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString(permissions)) }
 }
@@ -314,3 +322,4 @@ internal class SpanAwareGridScrollbarAdapter(private val state: LazyGridState) :
         }
     }
 }
+

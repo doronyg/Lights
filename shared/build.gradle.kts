@@ -1,28 +1,38 @@
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.android.kotlin.multiplatform.library) apply false // see androidEnabled
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
+}
+
+/** False on machines without the Android SDK (see settings.gradle.kts). */
+val androidEnabled = gradle.extra["androidEnabled"] as Boolean
+if (androidEnabled) {
+    apply(plugin = libs.plugins.android.kotlin.multiplatform.library.get().pluginId)
 }
 
 /**
  * Platform-independent app logic and UI (Home Assistant client, settings, command parsing,
  * QR encoding, Compose Multiplatform screens).
  * Platform services are injected at runtime via PlatformBridge (logic) and LocalPlatformUi (UI).
- *
- * Only the Android target is enabled for now; add e.g. `wasmJs { browser() }` to extend.
  */
 kotlin {
-    android {
-        namespace = "com.doronyg.mylightscontroller.shared"
-        compileSdk = 36
-        minSdk = 23
+    if (androidEnabled) {
+        extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("android") {
+            namespace = "com.doronyg.mylightscontroller.shared"
+            compileSdk = 36
+            minSdk = 23
 
-        withHostTest {}
+            withHostTest {}
+        }
     }
 
-    jvm() // Desktop (Compose Desktop, see :desktopApp)
+    jvm { // Desktop (Compose Desktop, see :desktopApp); Java 17+ bytecode
+        compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -45,11 +55,16 @@ kotlin {
             implementation(libs.kotlin.test)
         }
 
-        getByName("androidHostTest").dependencies {
-            implementation(libs.zxing.core) // only used to verify our QR encoder
+        if (androidEnabled) {
+            getByName("androidHostTest").dependencies {
+                implementation(libs.zxing.core) // only used to verify our QR encoder
+            }
         }
     }
 }
+
+
+
 
 
 

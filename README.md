@@ -36,6 +36,27 @@ Built with Kotlin and Jetpack Compose.
 - Home Assistant REST API
 - Material 3 UI
 
+## Desktop app ("Lights")
+
+The `:desktopApp` module runs the shared UI and logic on macOS, Windows and Linux (Compose Desktop).
+
+Requirements: JDK 17+ to run Gradle (Android Studio's bundled JDK is fine). The Android SDK is
+optional: without it, `:app` and the Android target are skipped automatically
+(force with `-Plights.android=false`).
+
+| Task | macOS / Linux | Windows |
+|---|---|---|
+| Run | `./gradlew :desktopApp:run` | `gradlew.bat :desktopApp:run` |
+| Tests | `./gradlew :desktopApp:test` | `gradlew.bat :desktopApp:test` |
+| Installer | `./gradlew :desktopApp:packageDmg` | `gradlew.bat :desktopApp:packageMsi` (or `packageExe`) |
+
+- Installers can only be built on their own OS (jpackage can't cross-compile).
+- Packaging tasks use a full JDK 21 (with `jpackage`), which Gradle downloads once if needed.
+- Output: `desktopApp/build/compose/binaries/main/<format>/`.
+- Settings (including the HA token): `~/.mylightscontroller` on macOS/Linux, `%APPDATA%\Lights` on Windows.
+- Environment variables `HA_URL`, `HA_TOKEN`, `PORCUPINE_API_KEY` provide defaults; `MYLIGHTS_DEBUG=true` enables debug options.
+- Not available on desktop yet: voice control, QR scanning (use manual setup), translation.
+
 ## Notes
 
 - Configuration secrets are supplied locally and are not committed to source control.
