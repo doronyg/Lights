@@ -1,7 +1,7 @@
 package com.doronyg.mylightscontroller.utils
 
-import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.platform.common.Permission
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -36,14 +36,14 @@ object Utils {
      * Check if microphone permission is granted via the platform bridge.
      * Uses Permission.MICROPHONE enum (platform-independent).
      */
-    fun checkAppPermissions(): Boolean {
+    suspend fun checkAppPermissions(): Boolean {
         return PlatformBridge.permissions.hasPermission(Permission.MICROPHONE)
     }
 
     /**
      * Request microphone permission via the platform bridge.
      * Uses Permission.MICROPHONE enum (platform-independent).
-     * Permission result will be delivered via MainActivity.permissionResult StateFlow.
+     * Permission result will be delivered via PlatformBridge.permissionResults.
      */
     fun requestAppPermissions() {
         PlatformBridge.permissions.requestPermission(Permission.MICROPHONE)

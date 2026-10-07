@@ -45,9 +45,9 @@ fun SettingsScreen(
                 pref = Settings::withVoiceControllerService,
                 onToggle = { enabled ->
                     if (enabled) {
-                        PlatformBridge.voiceController.startService(boot = false)
+                        PlatformBridge.voiceController.start()
                     } else {
-                        PlatformBridge.voiceController.stopService()
+                        PlatformBridge.voiceController.stop()
                     }
                 }
             )

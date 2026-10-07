@@ -31,8 +31,10 @@ import com.doronyg.mylightscontroller.commands.VoiceCommand
 import com.doronyg.mylightscontroller.ha.DeviceType
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
-import com.doronyg.mylightscontroller.platform.android.ui.MainActivity
+import com.doronyg.mylightscontroller.platform.android.AndroidPlatformPermissions
 import com.doronyg.mylightscontroller.platform.android.AndroidUtils
+import com.doronyg.mylightscontroller.platform.android.ui.MainActivity
+import com.doronyg.mylightscontroller.platform.common.Permission
 import com.doronyg.mylightscontroller.utils.Utils
 
 class VoiceControllerService : Service() {
@@ -44,7 +46,9 @@ class VoiceControllerService : Service() {
         private var createdByBoot : Boolean? = null
 
         fun startService(context: Context, boot: Boolean) {
-            if (Utils.checkAppPermissions() && Settings.withVoiceControllerService) {
+            if (AndroidPlatformPermissions.isGranted(context, Permission.MICROPHONE) &&
+                Settings.withVoiceControllerService
+            ) {
                 createdByBoot = this.createdByBoot ?: boot
                 val serviceIntent = Intent(context, VoiceControllerService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

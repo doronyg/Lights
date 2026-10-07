@@ -23,10 +23,10 @@ import kotlinx.coroutines.launch
  * this will use expect/actual createQrScanner() function per platform.
  */
 class QrScannerStateHolder(
-    private val context: Context,
-    private val lifecycleOwner: LifecycleOwner?,
+    context: Context,
+    lifecycleOwner: LifecycleOwner?,
     private val coroutineScope: CoroutineScope,
-    private val previewView: PreviewView? = null
+    previewView: PreviewView? = null
 ) {
     // Create scanner directly - Android-specific but will become expect/actual in KMP
     private val scanner: IPlatformQrScanner = AndroidPlatformQrScanner(

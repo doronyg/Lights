@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.onboarding.applyDemoConfig
 import com.doronyg.mylightscontroller.ui.SettingsActionCard
 import com.doronyg.mylightscontroller.ui.SimpleTopBar
+import kotlinx.coroutines.launch
 
 @Composable
 fun OnboardingScreen(
@@ -20,6 +22,8 @@ fun OnboardingScreen(
     onQrScan: () -> Unit,
     onClose: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -54,8 +58,10 @@ fun OnboardingScreen(
             title = "Use demo mode",
             description = "Explore the app with sample data",
             onClick = {
-                applyDemoConfig()
-                onSetupComplete()
+                scope.launch {
+                    applyDemoConfig()
+                    onSetupComplete()
+                }
             }
         )
     }

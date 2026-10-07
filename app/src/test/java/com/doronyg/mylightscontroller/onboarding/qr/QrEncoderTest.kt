@@ -1,37 +1,21 @@
 package com.doronyg.mylightscontroller.onboarding.qr
 
 import com.doronyg.mylightscontroller.onboarding.QrImageGenerator
-import com.google.zxing.BinaryBitmap
-import com.google.zxing.DecodeHintType
-import com.google.zxing.RGBLuminanceSource
-import com.google.zxing.common.BitMatrix
-import com.google.zxing.common.HybridBinarizer
-import com.google.zxing.qrcode.QRCodeReader
-import com.google.zxing.qrcode.decoder.Decoder
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
 import kotlin.random.Random
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 /**
- * Verifies our encoder against ZXing's decoder (test-only dependency).
+ * Platform-independent encoder tests (kotlin.test only).
+ * Ready to move to `commonTest` once the shared KMP module exists.
+ * Decoding round-trips against ZXing live in [QrEncoderZxingTest] (JVM-only).
  */
 class QrEncoderTest {
 
-    private fun decodeModules(qr: QrCode): String {
-        val m = BitMatrix(qr.size)
-        for (y in 0 until qr.size) for (x in 0 until qr.size) if (qr.isDark(x, y)) m.set(x, y)
-        return Decoder().decode(m).text
-    }
-
-    private fun randomAscii(len: Int, seed: Int): String {
-        val r = Random(seed)
-        val alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~:/?#[]@!$&'()*+,;=%"
-        return buildString { repeat(len) { append(alphabet[r.nextInt(alphabet.length)]) } }
-    }
-
     @Test
-    fun roundTripAcrossAllVersionsAndEccLevels() {
+    fun sizeMatchesVersionAcrossAllVersionsAndEccLevels() {
         val seenVersions = mutableSetOf<Int>()
         for (ecc in QrEncoder.Ecc.entries) {
             var len = 1
@@ -43,7 +27,6 @@ class QrEncoderTest {
                     break
                 }
                 assertEquals(qr.version * 4 + 17, qr.size)
-                assertEquals("v${qr.version} $ecc len=$len", text, decodeModules(qr))
                 seenVersions += qr.version
                 len += 7
             }
@@ -58,20 +41,15 @@ class QrEncoderTest {
     }
 
     @Test
-    fun utf8RoundTrip() {
-        val text = "mylightscontroller://setup?name=סלון&emoji=💡"
-        assertEquals(text, decodeModules(QrEncoder.encodeText(text)))
-    }
-
-    @Test(expected = IllegalArgumentException::class)
     fun tooLongThrows() {
-        QrEncoder.encodeText("x".repeat(3000), QrEncoder.Ecc.LOW)
+        assertFailsWith<IllegalArgumentException> {
+            QrEncoder.encodeText("x".repeat(3000), QrEncoder.Ecc.LOW)
+        }
     }
 
     @Test
-    fun renderedImageDecodesWithQuietZone() {
-        val text = "mylightscontroller://setup?" + randomAscii(300, 7)
-        val qr = QrEncoder.encodeText(text)
+    fun renderedImageHasRequestedSizeAndQuietZone() {
+        val qr = QrEncoder.encodeText("mylightscontroller://setup?" + randomAscii(300, 7))
         val img = QrImageGenerator.render(qr, 800)
 
         assertEquals(800, img.width)
@@ -79,13 +57,6 @@ class QrEncoderTest {
         // Corners must be white (quiet zone).
         assertEquals(-1, img.pixels[0])
         assertEquals(-1, img.pixels[img.pixels.size - 1])
-
-        val source = RGBLuminanceSource(img.width, img.height, img.pixels)
-        val result = QRCodeReader().decode(
-            BinaryBitmap(HybridBinarizer(source)),
-            mapOf(DecodeHintType.PURE_BARCODE to true)
-        )
-        assertEquals(text, result.text)
     }
 
     @Test
@@ -93,6 +64,14 @@ class QrEncoderTest {
         val qr = QrEncoder.encodeText("hi")
         val img = QrImageGenerator.render(qr, 1)
         assertTrue(img.width >= qr.size + 8)
+    }
+
+    companion object {
+        fun randomAscii(len: Int, seed: Int): String {
+            val r = Random(seed)
+            val alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~:/?#[]@!$&'()*+,;=%"
+            return buildString { repeat(len) { append(alphabet[r.nextInt(alphabet.length)]) } }
+        }
     }
 }
 

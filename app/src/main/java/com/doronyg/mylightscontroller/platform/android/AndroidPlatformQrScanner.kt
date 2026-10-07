@@ -13,7 +13,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.platform.common.IPlatformQrScanner
 import com.doronyg.mylightscontroller.platform.common.Permission
 import com.doronyg.mylightscontroller.utils.Utils
@@ -181,6 +180,6 @@ class AndroidPlatformQrScanner(
     }
 
     private fun hasCameraPermission(): Boolean {
-        return PlatformBridge.permissions.hasPermission(Permission.CAMERA)
+        return AndroidPlatformPermissions.isGranted(context, Permission.CAMERA)
     }
 }

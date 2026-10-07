@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
  * Platform-agnostic bridge layer.
  *
  * Provides access to platform-specific implementations through common interfaces.
- * Platform implementations must initialize these fields via AndroidPlatformInitializer.initialize()
+ * Each platform's initializer must set these fields at app startup,
  * before any platform services are used.
  *
  * For Kotlin Multiplatform migration: these can become expect/actual declarations.
@@ -39,7 +39,7 @@ object PlatformBridge {
     val permissionResults: StateFlow<Map<Permission, Boolean>> = _permissionResults
 
     /**
-     * Called by the activity when a permission request result is received.
+     * Called by the platform layer when a permission request result is received.
      * Updates the permission results map with the platform-independent Permission enum.
      */
     fun onPermissionResult(permission: Permission, granted: Boolean) {

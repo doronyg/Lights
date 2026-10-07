@@ -13,10 +13,11 @@ import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.R
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.onboarding.models.HaSetupPayload.Companion.parseSetupDeepLinkSafe
+import com.doronyg.mylightscontroller.platform.android.AndroidPlatformPermissions
 import com.doronyg.mylightscontroller.platform.android.IPermissionHandler
+import com.doronyg.mylightscontroller.platform.android.services.VoiceControllerService
 import com.doronyg.mylightscontroller.platform.common.Permission
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
-import com.doronyg.mylightscontroller.platform.android.services.VoiceControllerService
 import com.doronyg.mylightscontroller.utils.Utils
 
 class MainActivity : AppCompatActivity(), IPermissionHandler {
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity(), IPermissionHandler {
         handleDeepLink(intent)
     }
 
+    // Newer OS versions deliver results through this overload (with deviceId)...
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String?>,
@@ -53,22 +55,41 @@ class MainActivity : AppCompatActivity(), IPermissionHandler {
         deviceId: Int
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
+        handlePermissionResult(grantResults)
+    }
+
+    // ...older ones through this one. On some versions one delegates to the other,
+    // so handlePermissionResult() must be safe to call twice for the same result.
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        handlePermissionResult(grantResults)
+    }
+
+    /**
+     * Single entry point for permission results. Idempotent: the pending permission is
+     * consumed on the first call, so a second delivery of the same result is ignored.
+     */
+    private fun handlePermissionResult(grantResults: IntArray) {
+        val manifestPermission = pendingPermission ?: return
+        pendingPermission = null
 
         // Extract result from first permission (we only request one at a time)
         val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+        Utils.log("MainActivity: Permission result for $manifestPermission: $granted")
 
-        pendingPermission?.let { manifestPermission ->
-            Utils.log("MainActivity: Permission result for $manifestPermission: $granted")
-            // Convert manifest permission string back to platform-independent Permission enum
-            val permission = manifestPermissionToEnum(manifestPermission)
-            if (permission != null) {
-                PlatformBridge.onPermissionResult(permission, granted)
-            }
-            pendingPermission = null
+        // Convert manifest permission string back to platform-independent Permission enum
+        manifestPermissionToEnum(manifestPermission)?.let { permission ->
+            PlatformBridge.onPermissionResult(permission, granted)
         }
 
         VoiceControllerService.startService(this, false)
     }
+
 
     override fun requestPermission(manifestPermission: String) {
         Utils.log("MainActivity: Requesting permission: $manifestPermission")
@@ -77,7 +98,7 @@ class MainActivity : AppCompatActivity(), IPermissionHandler {
     }
 
     private fun requestPermissions() {
-        if (!Utils.checkAppPermissions() && !requestMicrophonePermission) {
+        if (!AndroidPlatformPermissions.isGranted(this, Permission.MICROPHONE) && !requestMicrophonePermission) {
             requestMicrophonePermission = true
             Utils.requestAppPermissions()
         }

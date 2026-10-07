@@ -1,6 +1,7 @@
 package com.doronyg.mylightscontroller.platform.android
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import com.doronyg.mylightscontroller.platform.common.IPlatformPermissions
@@ -25,15 +26,20 @@ object AndroidPlatformPermissions : IPlatformPermissions {
         }
     }
 
-    override fun hasPermission(permission: Permission): Boolean {
-        val context = AndroidActivityHolder.getCurrentActivity()?.baseContext ?: return false
-        val manifestPermission = permissionToAndroidString(permission)
-
-        return ContextCompat.checkSelfPermission(
-            context,
-            manifestPermission
-        ) == PackageManager.PERMISSION_GRANTED
+    override suspend fun hasPermission(permission: Permission): Boolean {
+        val context = AndroidUtils.appContext ?: return false
+        return isGranted(context, permission)
     }
+
+    /**
+     * Synchronous Android-only check. Uses any [Context] (application context works),
+     * so it is safe to call without a resumed activity (e.g. from BootReceiver).
+     */
+    fun isGranted(context: Context, permission: Permission): Boolean =
+        ContextCompat.checkSelfPermission(
+            context,
+            permissionToAndroidString(permission)
+        ) == PackageManager.PERMISSION_GRANTED
 
     override fun requestPermission(permission: Permission) {
         // Get the current resumed activity from the holder

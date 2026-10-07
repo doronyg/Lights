@@ -5,12 +5,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.doronyg.mylightscontroller.R
-import com.doronyg.mylightscontroller.Settings
-import com.doronyg.mylightscontroller.ha.mock.HomeAssistantApiMock
 import com.doronyg.mylightscontroller.onboarding.applyDemoConfig
 import com.doronyg.mylightscontroller.platform.android.AndroidUtils
-import com.doronyg.mylightscontroller.utils.MockUtils
+import kotlinx.coroutines.launch
 
 /**
  * Test version of MainActivity for visual regression testing.
@@ -30,23 +29,21 @@ class VisualTestMainActivity : AppCompatActivity() {
         // Initialize context FIRST
         AndroidUtils.appContext = applicationContext
 
-        // Set up mock data directly (avoid applyDemoConfig circular initialization)
-        Settings.useMockHaData = true
-        Settings.saveMockHaData = true
-        Settings.isConfigured = true
-        applyDemoConfig()
-
-        // Populate mock data
-        HomeAssistantApiMock.populateMockData(MockUtils.loadMockDevices())
-
-        // Set up UI without requiring permissions
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        // Demo config loads mock devices asynchronously; show UI only once data is ready
+        // so screenshots are deterministic.
+        lifecycleScope.launch {
+            applyDemoConfig()
+
+            // Set up UI without requiring permissions
+            setContentView(R.layout.activity_main)
+
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+                insets
+            }
         }
 
         // Skip:

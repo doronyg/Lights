@@ -1,8 +1,8 @@
 package com.doronyg.mylightscontroller.platform.android
 
 import android.content.Context
-import com.doronyg.mylightscontroller.platform.common.IPlatformVoiceController
 import com.doronyg.mylightscontroller.platform.android.services.VoiceControllerService
+import com.doronyg.mylightscontroller.platform.common.IPlatformVoiceController
 import com.doronyg.mylightscontroller.utils.Utils
 
 /**
@@ -24,15 +24,15 @@ object AndroidPlatformVoiceController : IPlatformVoiceController {
         appContext = context
     }
 
-    override fun startService(boot: Boolean) {
+    override fun start() {
         val context = appContext ?: run {
             Utils.log("VoiceController not initialized")
             return
         }
-        VoiceControllerService.startService(context, boot)
+        VoiceControllerService.startService(context, boot = false)
     }
 
-    override fun stopService() {
+    override fun stop() {
         val context = appContext ?: run {
             Utils.log("VoiceController not initialized")
             return

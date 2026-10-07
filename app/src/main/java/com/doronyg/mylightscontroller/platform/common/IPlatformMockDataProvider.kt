@@ -18,6 +18,6 @@ interface IPlatformMockDataProvider {
      * @return File content as string
      * @throws Exception if file not found or read fails
      */
-    fun readAssetFile(fileName: String): String
+    suspend fun readAssetFile(fileName: String): String
 }
 

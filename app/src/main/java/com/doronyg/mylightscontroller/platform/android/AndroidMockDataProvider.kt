@@ -1,7 +1,9 @@
 package com.doronyg.mylightscontroller.platform.android
 
 import com.doronyg.mylightscontroller.platform.common.IPlatformMockDataProvider
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.utils.Utils
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
@@ -26,13 +28,14 @@ object AndroidMockDataProvider : IPlatformMockDataProvider {
         }
     }
 
-    override fun readAssetFile(fileName: String): String {
-        val appContext = AndroidUtils.appContext
-            ?: throw IllegalStateException("appContext not initialized")
+    override suspend fun readAssetFile(fileName: String): String =
+        withContext(PlatformBridge.dispatchers.ioDispatcher()) {
+            val appContext = AndroidUtils.appContext
+                ?: throw IllegalStateException("appContext not initialized")
 
-        return appContext.assets
-            .open(fileName)
-            .bufferedReader()
-            .use { it.readText() }
-    }
+            appContext.assets
+                .open(fileName)
+                .bufferedReader()
+                .use { it.readText() }
+        }
 }

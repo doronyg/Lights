@@ -137,6 +137,7 @@ dependencies {
 
     // ---------- Unit & Instrumentation Tests ----------
     testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test.junit) // kotlin.test API, portable to commonTest
     testImplementation(libs.zxing.core) // only used to verify our QR encoder
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
