@@ -7,5 +7,6 @@ object AndroidPlatformDefaultConfig : IPlatformDefaultConfig {
     override val defaultHaUrl: String = BuildConfig.HA_URL
     override val defaultHaToken: String = BuildConfig.HA_TOKEN
     override val defaultPorcupineApiKey: String = BuildConfig.PORCUPINE_API_KEY
+    override val isDebug: Boolean = BuildConfig.DEBUG
 }
 

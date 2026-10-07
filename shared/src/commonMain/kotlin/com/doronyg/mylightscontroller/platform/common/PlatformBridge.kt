@@ -24,6 +24,7 @@ object PlatformBridge {
     lateinit var permissions: IPlatformPermissions
     lateinit var dispatchers: IPlatformDispatchers
     lateinit var mockDataProvider: IPlatformMockDataProvider
+    lateinit var dataExporter: IPlatformDataExporter
 
     /** Ktor HTTP engine for this platform (e.g. OkHttp on Android, Js on web). */
     lateinit var httpEngine: HttpClientEngineFactory<HttpClientEngineConfig>

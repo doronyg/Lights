@@ -1,6 +1,5 @@
 package com.doronyg.mylightscontroller.ui
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.Settings
@@ -57,7 +56,7 @@ fun MainScreen(
     val stackList by navigator.stack.collectAsState()
     val canGoBack = stackList.size > 1
 
-    BackHandler(enabled = canGoBack) {
+    PlatformBackHandler(enabled = canGoBack) {
         navigator.handle(NavigateBack)
     }
 
@@ -70,7 +69,7 @@ fun MainScreen(
 
     val showBottomBar = current is Screen.Tab
 
-    val fontScale = LocalConfiguration.current.fontScale
+    val fontScale = LocalDensity.current.fontScale
     val showLabels = fontScale < 1.3f
 
     Scaffold(

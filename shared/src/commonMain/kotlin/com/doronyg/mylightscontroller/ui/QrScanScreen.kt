@@ -1,6 +1,5 @@
 package com.doronyg.mylightscontroller.ui
 
-import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,11 +25,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.doronyg.mylightscontroller.utils.Utils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,19 +35,15 @@ fun QrScanScreen(
     onQrScanned: (String) -> Unit,
     onBack: () -> Unit
 ) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
+    val platformScanner = rememberPlatformQrScanner()
 
-    val previewView = remember { PreviewView(context) }
     var hasHandledScan by remember { mutableStateOf(false) }
 
     val stateHolder = remember {
         QrScannerStateHolder(
-            context = context,
-            lifecycleOwner = lifecycleOwner,
-            coroutineScope = coroutineScope,
-            previewView = previewView
+            scanner = platformScanner.scanner,
+            coroutineScope = coroutineScope
         )
     }
 
@@ -127,10 +119,7 @@ fun QrScanScreen(
         ) {
             // Camera preview
             if (permissionGranted) {
-                AndroidView(
-                    factory = { previewView },
-                    modifier = Modifier.fillMaxSize()
-                )
+                platformScanner.preview(Modifier.fillMaxSize())
             }
 
             // Overlay with status/error messages

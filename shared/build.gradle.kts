@@ -2,11 +2,14 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.compose.compiler)
 }
 
 /**
- * Platform-independent app logic (Home Assistant client, settings, command parsing, QR encoding).
- * Platform services are injected at runtime via PlatformBridge.
+ * Platform-independent app logic and UI (Home Assistant client, settings, command parsing,
+ * QR encoding, Compose Multiplatform screens).
+ * Platform services are injected at runtime via PlatformBridge (logic) and LocalPlatformUi (UI).
  *
  * Only the Android target is enabled for now; add e.g. `wasmJs { browser() }` to extend.
  */
@@ -27,6 +30,13 @@ kotlin {
             api(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.json)
+
+            // Compose Multiplatform (api: composables and Modifier appear in the public API)
+            api(libs.cmp.runtime)
+            api(libs.cmp.foundation)
+            api(libs.cmp.ui)
+            api(libs.cmp.material3)
+            implementation(libs.cmp.material.icons.extended)
         }
 
         commonTest.dependencies {
@@ -38,5 +48,6 @@ kotlin {
         }
     }
 }
+
 
 

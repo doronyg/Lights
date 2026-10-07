@@ -19,5 +19,10 @@ interface IPlatformDefaultConfig {
      * Default Porcupine API key from build configuration
      */
     val defaultPorcupineApiKey: String
+
+    /**
+     * True for debug builds (enables developer-only UI).
+     */
+    val isDebug: Boolean
 }
 

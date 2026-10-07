@@ -1,7 +1,5 @@
 package com.doronyg.mylightscontroller.ui
 
-import android.graphics.Bitmap
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -12,12 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.createBitmap
-import com.doronyg.mylightscontroller.onboarding.QrImageGenerator
 import com.doronyg.mylightscontroller.onboarding.models.AppConfig
 import com.doronyg.mylightscontroller.onboarding.models.HaSetupPayload
+import com.doronyg.mylightscontroller.onboarding.qr.QrCode
+import com.doronyg.mylightscontroller.onboarding.qr.QrEncoder
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SetupQrScreen(
@@ -36,16 +35,11 @@ fun SetupQrScreen(
         HaSetupPayload.buildSetupDeepLink(payload)
     }
 
-    val bitmapState = produceState<Bitmap?>(initialValue = null, encoded) {
-        val qrPixels = QrImageGenerator.generateQrPixels(encoded)
-        // Android-specific: Convert pixel data to Bitmap
-        val bitmap = createBitmap(qrPixels.width, qrPixels.height).apply {
-            setPixels(qrPixels.pixels, 0, qrPixels.width, 0, 0, qrPixels.width, qrPixels.height)
+    val qr = produceState<QrCode?>(initialValue = null, encoded) {
+        value = withContext(PlatformBridge.dispatchers.defaultDispatcher()) {
+            QrEncoder.encodeText(encoded)
         }
-        value = bitmap
-    }
-
-    val bitmap = bitmapState.value
+    }.value
 
     Column(
         modifier = Modifier.padding(16.dp)
@@ -60,9 +54,9 @@ fun SetupQrScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        if (bitmap != null) {
-            Image(
-                bitmap = bitmap.asImageBitmap(),
+        if (qr != null) {
+            QrCodeImage(
+                qr = qr,
                 contentDescription = "Setup QR",
                 modifier = Modifier.size(250.dp)
             )

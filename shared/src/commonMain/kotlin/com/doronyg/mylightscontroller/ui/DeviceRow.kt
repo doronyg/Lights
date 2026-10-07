@@ -29,7 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.ha.HaDevice
 
@@ -40,7 +40,7 @@ fun DeviceRow(
     onClick: () -> Unit,
     onBrightnessChange: ((Int) -> Unit)? = null
 ) {
-    val fontScale = LocalConfiguration.current.fontScale
+    val fontScale = LocalDensity.current.fontScale
     val accessibilityMode = fontScale >= 1.3f
 
     var sliderValue by remember {

@@ -21,6 +21,7 @@ object AndroidPlatformInitializer {
         PlatformBridge.permissions = AndroidPlatformPermissions
         PlatformBridge.dispatchers = AndroidPlatformDispatchers()
         PlatformBridge.mockDataProvider = AndroidMockDataProvider
+        PlatformBridge.dataExporter = AndroidEmailHelper
         PlatformBridge.httpEngine = OkHttp
 
         // Initialize platform implementations that need context

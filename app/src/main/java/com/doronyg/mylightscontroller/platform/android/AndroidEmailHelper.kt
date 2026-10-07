@@ -2,6 +2,7 @@ package com.doronyg.mylightscontroller.platform.android
 
 import android.content.Intent
 import androidx.core.content.FileProvider
+import com.doronyg.mylightscontroller.platform.common.IPlatformDataExporter
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.utils.MockUtils
 import com.doronyg.mylightscontroller.utils.Utils
@@ -10,11 +11,13 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 /**
- * Android-specific email helper.
+ * Android implementation of [IPlatformDataExporter].
  * Sends files via Android Intent.ACTION_SEND.
  * Context is obtained from AndroidUtils (initialized at app startup).
  */
-object AndroidEmailHelper {
+object AndroidEmailHelper : IPlatformDataExporter {
+
+    override fun exportHaData() = sendHaDataViaEmail()
 
     fun sendHaDataViaEmail() {
         MockUtils.saveMockData { path ->

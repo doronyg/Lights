@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
+import com.doronyg.mylightscontroller.ui.LocalPlatformUi
 import com.doronyg.mylightscontroller.ui.MainScreen
 import com.doronyg.mylightscontroller.ui.MyTheme
 
@@ -20,8 +22,10 @@ class MainFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                MyTheme {
-                    MainScreen()
+                CompositionLocalProvider(LocalPlatformUi provides AndroidPlatformUi) {
+                    MyTheme {
+                        MainScreen()
+                    }
                 }
             }
         }

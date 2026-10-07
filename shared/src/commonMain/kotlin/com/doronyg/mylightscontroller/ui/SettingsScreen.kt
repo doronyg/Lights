@@ -10,9 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.doronyg.mylightscontroller.BuildConfig
 import com.doronyg.mylightscontroller.Settings
-import com.doronyg.mylightscontroller.platform.android.AndroidEmailHelper
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.ui.navigator.Screen
 import com.doronyg.mylightscontroller.ui.navigator.UiEvent
@@ -95,12 +93,12 @@ fun SettingsScreen(
                 title = "Export data via email",
                 description = "Export lights JSON and send via email",
                 onClick = {
-                    AndroidEmailHelper.sendHaDataViaEmail()
+                    PlatformBridge.dataExporter.exportHaData()
                 }
             )
         }
 
-        if (BuildConfig.DEBUG) {
+        if (PlatformBridge.defaultConfig.isDebug) {
             item {
                 SettingsActionCard(
                     title = "Export HA data (debug)",

@@ -12,7 +12,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.ha.HaDevice
 
@@ -24,7 +24,7 @@ fun DeviceGrid(
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
     ) {
-        val fontScale = LocalConfiguration.current.fontScale
+        val fontScale = LocalDensity.current.fontScale
         val accessibilityMode = fontScale >= 1.3f
 
         // Responsive column count based on width or font scale
