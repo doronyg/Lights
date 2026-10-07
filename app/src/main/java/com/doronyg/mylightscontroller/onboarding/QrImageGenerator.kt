@@ -1,8 +1,8 @@
 package com.doronyg.mylightscontroller.onboarding
 
+import com.doronyg.mylightscontroller.onboarding.qr.QrCode
+import com.doronyg.mylightscontroller.onboarding.qr.QrEncoder
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.withContext
 
 /**
@@ -28,21 +28,34 @@ object QrImageGenerator {
         content: String,
         size: Int = 800
     ): QrPixelData = withContext(PlatformBridge.dispatchers.defaultDispatcher()) {
-        val bitMatrix = QRCodeWriter()
-            .encode(content, BarcodeFormat.QR_CODE, size, size)
+        render(QrEncoder.encodeText(content), size)
+    }
 
-        val width = bitMatrix.width
-        val height = bitMatrix.height
+    /** Quiet-zone width in modules, as required by the QR spec. */
+    private const val QUIET_ZONE = 4
 
-        val pixels = IntArray(width * height)
-        for (y in 0 until height) {
-            val row = y * width
-            for (x in 0 until width) {
-                pixels[row + x] = if (bitMatrix[x, y]) BLACK else WHITE
+    /**
+     * Rasterize [qr] into a square image of at least [size] pixels, with a 4-module
+     * quiet zone, integer module scaling and centered padding (same layout ZXing used).
+     */
+    internal fun render(qr: QrCode, size: Int): QrPixelData {
+        val fullModules = qr.size + QUIET_ZONE * 2
+        val outSize = maxOf(size, fullModules)
+        val scale = outSize / fullModules
+        val offset = (outSize - qr.size * scale) / 2
+
+        val pixels = IntArray(outSize * outSize) { WHITE }
+        for (my in 0 until qr.size) {
+            for (mx in 0 until qr.size) {
+                if (!qr.isDark(mx, my)) continue
+                val startX = offset + mx * scale
+                val startY = offset + my * scale
+                for (py in startY until startY + scale) {
+                    pixels.fill(BLACK, py * outSize + startX, py * outSize + startX + scale)
+                }
             }
         }
-
-        QrPixelData(width, height, pixels)
+        return QrPixelData(outSize, outSize, pixels)
     }
 }
 
@@ -57,9 +70,7 @@ data class QrPixelData(
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as QrPixelData
+        if (other !is QrPixelData) return false
 
         if (width != other.width) return false
         if (height != other.height) return false

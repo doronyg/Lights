@@ -58,7 +58,7 @@ mlkit-translate = { module = "com.google.mlkit:translate", version.ref = "mlkitT
 mlkit-barcode = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkitBarcode" }
 
 # ---------- Other libs ----------
-zxing = { module = "com.google.zxing:javase", version.ref = "zxing" }
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 porcupine-android = { module = "ai.picovoice:porcupine-android", version.ref = "porcupine" }
 # ---------- Test ----------

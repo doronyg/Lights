@@ -132,12 +132,12 @@ dependencies {
     implementation(libs.mlkit.translate)
 
     // ---------- Other ----------
-    implementation(libs.zxing)
     implementation(libs.guava)
     implementation(libs.porcupine.android)
 
     // ---------- Unit & Instrumentation Tests ----------
     testImplementation(libs.junit)
+    testImplementation(libs.zxing.core) // only used to verify our QR encoder
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
