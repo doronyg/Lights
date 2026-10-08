@@ -1,0 +1,10 @@
+services:
+  lights:
+    build: .
+    image: lights-gateway:latest
+    container_name: lights
+    restart: unless-stopped
+    ports:
+      - "8321:8321" # to use another port on the NAS, change the first number
+    volumes:
+      - ./data:/data # the Home Assistant URL + token (ha.properties) - kept across updates

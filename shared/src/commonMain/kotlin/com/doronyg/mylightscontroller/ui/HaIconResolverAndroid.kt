@@ -1,5 +1,10 @@
 package com.doronyg.mylightscontroller.ui
 
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.doronyg.mylightscontroller.ha.HaDevice
+import com.doronyg.mylightscontroller.ha.HaIcon
+import com.doronyg.mylightscontroller.ha.HaIconResolver
+import com.doronyg.mylightscontroller.ui.icons.Basement
 import com.doronyg.mylightscontroller.ui.icons.Bathtub
 import com.doronyg.mylightscontroller.ui.icons.Bed
 import com.doronyg.mylightscontroller.ui.icons.ChildCare
@@ -19,11 +24,6 @@ import com.doronyg.mylightscontroller.ui.icons.Thermostat
 import com.doronyg.mylightscontroller.ui.icons.ToggleOn
 import com.doronyg.mylightscontroller.ui.icons.Wc
 import com.doronyg.mylightscontroller.ui.icons.Weekend
-import androidx.compose.ui.graphics.vector.ImageVector
-import com.doronyg.mylightscontroller.ha.HaDevice
-import com.doronyg.mylightscontroller.ha.HaIcon
-import com.doronyg.mylightscontroller.ha.HaIconResolver
-import com.doronyg.mylightscontroller.ui.icons.Basement
 
 /**
  * Android-specific icon resolver extension.

@@ -15,9 +15,12 @@ object Settings {
     var useMockHaData by PlatformBridge.preferences.booleanPref("USE_MOCK_HA_DATA")
     var isConfigured by PlatformBridge.preferences.booleanPref("IS_CONFIGURED", !Config.homeAssistantUrl.isEmpty())
 
-    /** Ready to talk to HA: set up in the app, or the connection is managed outside it (web gateway). */
+    /**
+     * Set up and ready to talk to HA. On the web this mirrors the gateway's state (checked at
+     * startup), since the URL and token live on the gateway.
+     */
     val hasHaConnection: Boolean
-        get() = isConfigured || PlatformBridge.haEndpoint.credentialsManagedExternally
+        get() = isConfigured
 
     fun withMockData() = useMockHaData || !hasHaConnection
 }

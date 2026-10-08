@@ -20,9 +20,16 @@ interface IHaEndpoint {
 
     /**
      * True when the HA URL and token are configured outside the app (e.g. by the web gateway),
-     * so the app never sees the token: no setup screens, nothing to export.
+     * so the app never keeps the token: no Setup QR, nothing to export.
      */
     val credentialsManagedExternally: Boolean get() = false
+
+    /**
+     * Sends the HA URL and token to the server that manages them (web gateway first-run setup).
+     * @return null on success, otherwise a message for the user.
+     */
+    suspend fun configureRemote(haUrl: String, haToken: String): String? =
+        "Not supported on this platform"
 }
 
 /** Native apps (Android, desktop): talk to HA directly with the user's long-lived token. */

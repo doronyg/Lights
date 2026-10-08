@@ -24,3 +24,16 @@ if (config.devServer && process.env.HA_URL) {
     console.log('[gateway] proxying /api to ' + target + (token ? ' (with token)' : ' (NO HA_TOKEN set)'));
 }
 
+// The real gateway (gateway/ module) answers these; the dev server mimics them.
+if (config.devServer) {
+    const previous = config.devServer.setupMiddlewares;
+    config.devServer.setupMiddlewares = (middlewares, devServer) => {
+        devServer.app.get('/gateway/status', (req, res) =>
+            res.type('text/plain').send(process.env.HA_URL ? 'configured' : 'unconfigured'));
+        devServer.app.post('/gateway/setup', (req, res) =>
+            res.status(501).type('text/plain').send(
+                'Dev server: set HA_URL and HA_TOKEN before running Gradle (or use ?demo).'));
+        return previous ? previous(middlewares, devServer) : middlewares;
+    };
+}
+

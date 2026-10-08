@@ -6,6 +6,7 @@ import androidx.compose.ui.window.ComposeViewport
 import com.doronyg.mylightscontroller.Settings
 import com.doronyg.mylightscontroller.ha.HomeAssistantRepository
 import com.doronyg.mylightscontroller.onboarding.applyDemoConfig
+import com.doronyg.mylightscontroller.platform.web.GatewayHaEndpoint
 import com.doronyg.mylightscontroller.platform.web.WebPlatformInitializer
 import com.doronyg.mylightscontroller.platform.web.WebPlatformPreferences
 import com.doronyg.mylightscontroller.platform.web.WebPlatformUi
@@ -23,32 +24,44 @@ import kotlinx.coroutines.launch
 fun main() {
     WebPlatformInitializer.initialize()
 
+    MainScope().launch {
+        try {
+            prepareConnection()
+        } catch (e: Exception) {
+            Utils.logException(e, "Startup failed")
+        }
+
+        pollHomeAssistantWhileVisible()
+
+        ComposeViewport {
+            CompositionLocalProvider(LocalPlatformUi provides WebPlatformUi) {
+                MyTheme {
+                    MainScreen()
+                }
+            }
+        }
+    }
+}
+
+/** Decides, before the UI starts, whether to show the device grid or the first-run setup. */
+private suspend fun prepareConnection() {
     // `?demo`: built-in demo devices, no Home Assistant / gateway needed
     if (isQueryParamSet("demo")) {
         WebDemoState.active = true
-        MainScope().launch {
-            try {
-                applyDemoConfig()
-            } catch (e: Exception) {
-                Utils.logException(e, "Failed to apply demo config")
-            }
-        }
-    } else if (WebDemoState.active) {
+        applyDemoConfig()
+        return
+    }
+
+    if (WebDemoState.active) {
         // Demo settings are persisted in localStorage; leave demo mode once `?demo` is dropped
         WebDemoState.active = false
         Settings.useMockHaData = false
         Settings.saveMockHaData = false
     }
 
-    pollHomeAssistantWhileVisible()
-
-    ComposeViewport {
-        CompositionLocalProvider(LocalPlatformUi provides WebPlatformUi) {
-            MyTheme {
-                MainScreen()
-            }
-        }
-    }
+    // The HA details live on the gateway: show setup until it has them.
+    // If it can't be asked (offline), keep what we knew last time.
+    GatewayHaEndpoint.isGatewayConfigured()?.let { Settings.isConfigured = it }
 }
 
 /** Remembers that the last load was a `?demo` session. */

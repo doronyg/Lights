@@ -1,6 +1,5 @@
 package com.doronyg.mylightscontroller.platform.android.ui
 
-import androidx.activity.compose.BackHandler as AndroidBackHandler
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -10,6 +9,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.doronyg.mylightscontroller.platform.android.AndroidPlatformQrScanner
 import com.doronyg.mylightscontroller.ui.PlatformQrScanner
 import com.doronyg.mylightscontroller.ui.PlatformUi
+import androidx.activity.compose.BackHandler as AndroidBackHandler
 
 /**
  * Android implementation of the shared UI's platform hooks.

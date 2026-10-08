@@ -68,8 +68,12 @@ It never sees the HA token: requests go to `/api/...` on the same origin, and a 
 | Dev server (proxies to HA) | `HA_URL=http://homeassistant.local:8123 HA_TOKEN=<token> ./gradlew :webApp:wasmJsBrowserDevelopmentRun` |
 | Demo (no HA) | run the dev server without `HA_URL`, open `http://localhost:8080/?demo` |
 | Release build | `./gradlew :webApp:wasmJsBrowserDistribution` → `webApp/build/dist/wasmJs/productionExecutable/` |
+| Gateway, locally | `./gradlew :gateway:run` → `http://localhost:8321` (first-run setup asks for the HA URL + token) |
+| NAS bundle | `./gradlew :gateway:bundle` → `gateway/build/bundle/lights/` + `lights.zip`, see [gateway/README.md](gateway/README.md) |
 
-- In production, serve the release output and proxy `/api/` to HA with an `Authorization: Bearer <token>` header (e.g. nginx `proxy_set_header`).
+- Production: the `:gateway` server (Ktor, in Docker on the NAS) serves the web app, forwards only
+  the HA calls the app needs and adds the token. The URL + token are entered once on the
+  first-run setup screen and stored on the NAS only.
 - Settings are kept in the browser's `localStorage`; add `?debug` to the URL for debug options.
 - Not available on the web yet: voice control, QR scanning, setup QR, translation, browser back button.
 

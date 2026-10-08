@@ -26,9 +26,11 @@ import com.doronyg.mylightscontroller.utils.Utils
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.js.Js
 import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
+import io.ktor.http.parameters
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,6 +63,33 @@ object GatewayHaEndpoint : IHaEndpoint {
     override val baseUrl: String get() = pageOrigin()
     override fun authorize(request: HttpRequestBuilder) = Unit // the gateway authenticates
     override val credentialsManagedExternally = true
+
+    private val client by lazy { HttpClient(Js) }
+
+    /** Whether the gateway has HA details; null if it couldn't be asked. */
+    suspend fun isGatewayConfigured(): Boolean? = try {
+        val response = client.get("$baseUrl/gateway/status")
+        if (response.status.isSuccess()) response.bodyAsText().trim() == "configured" else null
+    } catch (e: Exception) {
+        Utils.logException(e, "Gateway status check failed")
+        null
+    }
+
+    /** First-run setup: the gateway checks the details against HA and stores them. */
+    override suspend fun configureRemote(haUrl: String, haToken: String): String? = try {
+        val response = client.submitForm(
+            url = "$baseUrl/gateway/setup",
+            formParameters = parameters {
+                append("haUrl", haUrl)
+                append("haToken", haToken)
+            }
+        )
+        if (response.status.isSuccess()) null
+        else response.bodyAsText().take(300).ifBlank { "Setup failed (${response.status})" }
+    } catch (e: Exception) {
+        Utils.logException(e, "Gateway setup failed")
+        "Could not reach the server: ${e.message}"
+    }
 }
 
 /** Settings in the browser's localStorage (per site). The HA token is never stored here. */
