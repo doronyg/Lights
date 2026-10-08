@@ -59,9 +59,21 @@ private suspend fun prepareConnection() {
         Settings.saveMockHaData = false
     }
 
-    // The HA details live on the gateway: show setup until it has them.
-    // If it can't be asked (offline), keep what we knew last time.
-    GatewayHaEndpoint.isGatewayConfigured()?.let { Settings.isConfigured = it }
+    // The HA details live on the gateway: check its status to decide if setup is needed.
+    // If it can't be reached (offline), keep what we knew last time (persisted in localStorage).
+    try {
+        val isConfigured = GatewayHaEndpoint.isGatewayConfigured()
+        if (isConfigured != null) {
+            Settings.isConfigured = isConfigured
+            Utils.log("Gateway status: ${if (isConfigured) "configured" else "not configured"}")
+        } else {
+            // Gateway offline: keep previous state. Log a warning for debugging.
+            Utils.log("Warning: Could not reach gateway to check status (offline?). Using previous state.")
+        }
+    } catch (e: Exception) {
+        Utils.logException(e, "Failed to check gateway status")
+        // Continue with previous state
+    }
 }
 
 /** Remembers that the last load was a `?demo` session. */

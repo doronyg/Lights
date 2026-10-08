@@ -25,6 +25,7 @@ import com.doronyg.mylightscontroller.utils.StringCodec
 import com.doronyg.mylightscontroller.utils.Utils
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.js.Js
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
@@ -64,7 +65,14 @@ object GatewayHaEndpoint : IHaEndpoint {
     override fun authorize(request: HttpRequestBuilder) = Unit // the gateway authenticates
     override val credentialsManagedExternally = true
 
-    private val client by lazy { HttpClient(Js) }
+    private val client by lazy {
+        HttpClient(Js) {
+            install(HttpTimeout) {
+                connectTimeoutMillis = 10_000
+                socketTimeoutMillis = 15_000
+            }
+        }
+    }
 
     /** Whether the gateway has HA details; null if it couldn't be asked. */
     suspend fun isGatewayConfigured(): Boolean? = try {
@@ -119,11 +127,15 @@ object WebPlatformPreferences : IPlatformPreferences {
         object : ReadWriteProperty<Any, String> {
             override fun getValue(thisRef: Any, property: KProperty<*>): String {
                 val raw = get(key) ?: return default
-                return runCatching { codec.decode(raw) }.getOrDefault(default)
+                return runCatching { codec.decode(raw) }.onFailure {
+                    Utils.logException(it, "Failed to decode preference $key, using default")
+                }.getOrDefault(default)
             }
 
             override fun setValue(thisRef: Any, property: KProperty<*>, value: String) =
-                put(key, runCatching { codec.encode(value) }.getOrDefault(value))
+                put(key, runCatching { codec.encode(value) }.onFailure {
+                    Utils.logException(it, "Failed to encode preference $key")
+                }.getOrDefault(value))
         }
 }
 
@@ -225,8 +237,24 @@ object WebPlatformUi : SkikoPlatformUi() {
 
 // --- Browser APIs (Kotlin/Wasm JS interop) ---
 
-private fun storageGet(key: String): String? = js("localStorage.getItem(key)")
-private fun storageSet(key: String, value: String): Unit = js("localStorage.setItem(key, value)")
+// js(...) must be the whole function body in Kotlin/Wasm, so errors are caught in JS.
+
+/** Value from localStorage; null if missing or storage is unavailable (e.g. blocked by the browser). */
+private fun storageGet(key: String): String? = js(
+    """{
+        try { return localStorage.getItem(key); }
+        catch (e) { console.warn('localStorage read failed: ' + e); return null; }
+    }"""
+)
+
+/** Writes to localStorage; logs a warning if storage is unavailable or full. */
+private fun storageSet(key: String, value: String): Unit = js(
+    """{
+        try { localStorage.setItem(key, value); }
+        catch (e) { console.warn('localStorage write failed (settings will not persist): ' + e); }
+    }"""
+)
+
 private fun pageOrigin(): String = js("window.location.origin")
 private fun resolveUrl(path: String): String = js("new URL(path, document.baseURI).href")
 private fun consoleLog(message: String): Unit = js("console.log(message)")

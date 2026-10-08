@@ -16,11 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.Settings
+import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.ui.ScrollableColumn
 import com.doronyg.mylightscontroller.ui.SettingsActionCard
 import com.doronyg.mylightscontroller.ui.SettingsTextField
@@ -28,6 +30,7 @@ import com.doronyg.mylightscontroller.ui.SimpleTopBar
 import com.doronyg.mylightscontroller.ui.lightOnColors
 import com.doronyg.mylightscontroller.utils.Utils
 import io.ktor.http.Url
+import kotlinx.coroutines.launch
 
 @Composable
 fun ManualSetupScreen(
@@ -40,6 +43,12 @@ fun ManualSetupScreen(
     var porcupineKey by remember { mutableStateOf("") }
 
     var hasSubmitted by remember { mutableStateOf(false) }
+    var saving by remember { mutableStateOf(false) }
+    var saveError by remember { mutableStateOf<String?>(null) }
+
+    val scope = rememberCoroutineScope()
+    val endpoint = PlatformBridge.haEndpoint
+    val remoteSetup = endpoint.credentialsManagedExternally
 
     val lightOnColors = lightOnColors()
     val accentColor = if (isSystemInDarkTheme()) lightOnColors.first else lightOnColors.second
@@ -169,14 +178,31 @@ fun ManualSetupScreen(
 
         SettingsActionCard(
             title = "Save configuration",
-            description = if (isValid) {
-                "Apply settings and continue"
-            } else {
-                "Fix the errors above"
+            description = when {
+                saving -> "Checking the connection to Home Assistant..."
+                isValid -> "Apply settings and continue"
+                else -> "Fix the errors above"
             },
             onClick = {
+                hasSubmitted = true
+                if (!isValid || saving) return@SettingsActionCard
 
-                if (!isValid) return@SettingsActionCard
+                if (remoteSetup) {
+                    saving = true
+                    scope.launch {
+                        saveError = null
+                        val error = endpoint.configureRemote(url, token)
+                        saving = false
+                        if (error == null) {
+                            Settings.useMockHaData = false
+                            Settings.isConfigured = true
+                            onSave()
+                        } else {
+                            saveError = error
+                        }
+                    }
+                    return@SettingsActionCard
+                }
 
                 Config.homeAssistantUrl = url
                 Config.homeAssistantToken = token
@@ -191,6 +217,22 @@ fun ManualSetupScreen(
                 onSave()
             }
         )
+
+        if (saveError != null) {
+            Spacer(Modifier.height(16.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Text(
+                    text = saveError ?: "",
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
     }
 }
 
