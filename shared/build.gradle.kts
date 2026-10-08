@@ -48,7 +48,6 @@ kotlin {
             api(libs.cmp.foundation)
             api(libs.cmp.ui)
             api(libs.cmp.material3)
-            implementation(libs.cmp.material.icons.extended)
         }
 
         commonTest.dependencies {
@@ -62,6 +61,7 @@ kotlin {
         }
     }
 }
+
 
 
 

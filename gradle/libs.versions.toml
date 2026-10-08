@@ -12,12 +12,10 @@ kotlinxSerialization = "1.7.3"
 composeBom = "2026.05.01"
 activityCompose = "1.13.0"
 lifecycleCompose = "2.10.0"
-iconsExtended = "1.7.8"
 # Keep aligned with composeBom's androidx Compose version (BOM 2026.05.01 -> 1.11.x);
 # CMP 1.12+ maps to androidx Compose 1.12 which requires compileSdk 37.
 composeMultiplatform = "1.11.1"
 composeMultiplatformMaterial3 = "1.9.0"
-composeMultiplatformIcons = "1.7.3"
 camera = "1.6.1"
 mlkitTranslate = "17.0.3"
 mlkitBarcode = "17.3.0"
@@ -47,13 +45,11 @@ androidx-foundation-layout = { module = "androidx.compose.foundation:foundation-
 androidx-material3 = { module = "androidx.compose.material3:material3" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleCompose" }
-androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "iconsExtended" }
 # ---------- Compose Multiplatform (shared UI) ----------
 cmp-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
 cmp-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
 cmp-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
 cmp-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "composeMultiplatformMaterial3" }
-cmp-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "composeMultiplatformIcons" }
 # ---------- Networking ----------
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }

@@ -1,25 +1,24 @@
 package com.doronyg.mylightscontroller.ui
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bathtub
-import androidx.compose.material.icons.filled.Bed
-import androidx.compose.material.icons.filled.ChildCare
-import androidx.compose.material.icons.filled.Deck
-import androidx.compose.material.icons.filled.Devices
-import androidx.compose.material.icons.filled.DoorFront
-import androidx.compose.material.icons.filled.Garage
-import androidx.compose.material.icons.filled.Kitchen
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.LocalLaundryService
-import androidx.compose.material.icons.filled.Power
-import androidx.compose.material.icons.filled.PowerSettingsNew
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Router
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Thermostat
-import androidx.compose.material.icons.filled.ToggleOn
-import androidx.compose.material.icons.filled.Wc
-import androidx.compose.material.icons.filled.Weekend
+import com.doronyg.mylightscontroller.ui.icons.Bathtub
+import com.doronyg.mylightscontroller.ui.icons.Bed
+import com.doronyg.mylightscontroller.ui.icons.ChildCare
+import com.doronyg.mylightscontroller.ui.icons.Deck
+import com.doronyg.mylightscontroller.ui.icons.Devices
+import com.doronyg.mylightscontroller.ui.icons.DoorFront
+import com.doronyg.mylightscontroller.ui.icons.Garage
+import com.doronyg.mylightscontroller.ui.icons.Kitchen
+import com.doronyg.mylightscontroller.ui.icons.Lightbulb
+import com.doronyg.mylightscontroller.ui.icons.LocalLaundryService
+import com.doronyg.mylightscontroller.ui.icons.Power
+import com.doronyg.mylightscontroller.ui.icons.PowerSettingsNew
+import com.doronyg.mylightscontroller.ui.icons.Restaurant
+import com.doronyg.mylightscontroller.ui.icons.Router
+import com.doronyg.mylightscontroller.ui.icons.Settings
+import com.doronyg.mylightscontroller.ui.icons.Thermostat
+import com.doronyg.mylightscontroller.ui.icons.ToggleOn
+import com.doronyg.mylightscontroller.ui.icons.Wc
+import com.doronyg.mylightscontroller.ui.icons.Weekend
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.doronyg.mylightscontroller.ha.HaDevice
 import com.doronyg.mylightscontroller.ha.HaIcon
@@ -49,33 +48,33 @@ object HaIconResolverAndroid {
     fun getComposableIcon(icon: HaIcon): ImageVector {
         return when (icon) {
             // Bottom tabs
-            HaIcon.MAIN -> Icons.Default.Lightbulb
-            HaIcon.UNAVAILABLE -> Icons.Default.PowerSettingsNew
-            HaIcon.SETTINGS -> Icons.Default.Settings
+            HaIcon.MAIN -> Lightbulb
+            HaIcon.UNAVAILABLE -> PowerSettingsNew
+            HaIcon.SETTINGS -> Settings
 
             // Rooms
-            HaIcon.BATHTUB -> Icons.Default.Bathtub
-            HaIcon.WC -> Icons.Default.Wc
-            HaIcon.BEDROOM -> Icons.Default.Bed
-            HaIcon.KITCHEN -> Icons.Default.Kitchen
-            HaIcon.RESTAURANT -> Icons.Default.Restaurant
-            HaIcon.LIVING_ROOM -> Icons.Default.Weekend
+            HaIcon.BATHTUB -> Bathtub
+            HaIcon.WC -> Wc
+            HaIcon.BEDROOM -> Bed
+            HaIcon.KITCHEN -> Kitchen
+            HaIcon.RESTAURANT -> Restaurant
+            HaIcon.LIVING_ROOM -> Weekend
             HaIcon.BASEMENT -> Basement
-            HaIcon.PLAYROOM -> Icons.Default.ChildCare
-            HaIcon.PATIO -> Icons.Default.Deck
-            HaIcon.MUDROOM -> Icons.Default.DoorFront
-            HaIcon.LAUNDRY -> Icons.Default.LocalLaundryService
-            HaIcon.GARAGE -> Icons.Default.Garage
+            HaIcon.PLAYROOM -> ChildCare
+            HaIcon.PATIO -> Deck
+            HaIcon.MUDROOM -> DoorFront
+            HaIcon.LAUNDRY -> LocalLaundryService
+            HaIcon.GARAGE -> Garage
 
             // Devices
-            HaIcon.LIGHTBULB -> Icons.Default.Lightbulb
-            HaIcon.POWER -> Icons.Default.Power
-            HaIcon.ROUTER -> Icons.Default.Router
-            HaIcon.THERMOSTAT -> Icons.Default.Thermostat
-            HaIcon.SWITCH -> Icons.Default.ToggleOn
+            HaIcon.LIGHTBULB -> Lightbulb
+            HaIcon.POWER -> Power
+            HaIcon.ROUTER -> Router
+            HaIcon.THERMOSTAT -> Thermostat
+            HaIcon.SWITCH -> ToggleOn
 
             // Fallback
-            HaIcon.DEVICES -> Icons.Default.Devices
+            HaIcon.DEVICES -> Devices
         }
     }
 }
