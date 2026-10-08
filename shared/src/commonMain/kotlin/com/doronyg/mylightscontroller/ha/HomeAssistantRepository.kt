@@ -5,6 +5,7 @@ import com.doronyg.mylightscontroller.ha.mock.HomeAssistantApiMock
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import com.doronyg.mylightscontroller.utils.Utils
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -34,7 +35,11 @@ class HomeAssistantRepository private constructor() {
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
-    private val scope = CoroutineScope(SupervisorJob() + PlatformBridge.dispatchers.uiDispatcher())
+    // Unexpected errors in one job are logged (with stack) instead of escaping; other jobs keep running
+    private val scope = CoroutineScope(
+        SupervisorJob() + PlatformBridge.dispatchers.uiDispatcher() +
+            CoroutineExceptionHandler { _, e -> Utils.logException(e, "HomeAssistantRepository job failed") }
+    )
 
     // --- UI presence tracking ---
     private var nextToken = 0

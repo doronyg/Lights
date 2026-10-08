@@ -1,8 +1,6 @@
 package com.doronyg.mylightscontroller
 
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
-import com.doronyg.mylightscontroller.utils.Base64Codec
-import com.doronyg.mylightscontroller.utils.StringCodec
 
 /**
  * Application settings management.
@@ -17,11 +15,9 @@ object Settings {
     var useMockHaData by PlatformBridge.preferences.booleanPref("USE_MOCK_HA_DATA")
     var isConfigured by PlatformBridge.preferences.booleanPref("IS_CONFIGURED", !Config.homeAssistantUrl.isEmpty())
 
-    fun withMockData() = useMockHaData || !isConfigured
+    /** Ready to talk to HA: set up in the app, or the connection is managed outside it (web gateway). */
+    val hasHaConnection: Boolean
+        get() = isConfigured || PlatformBridge.haEndpoint.credentialsManagedExternally
 
-    fun stringPref(
-        key: String,
-        default: String = "",
-        codec: StringCodec = Base64Codec
-    ) = PlatformBridge.preferences.stringPref(key, default, codec)
+    fun withMockData() = useMockHaData || !hasHaConnection
 }

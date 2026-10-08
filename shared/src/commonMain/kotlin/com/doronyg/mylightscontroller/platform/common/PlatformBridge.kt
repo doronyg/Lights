@@ -29,6 +29,9 @@ object PlatformBridge {
     /** Ktor HTTP engine for this platform (e.g. OkHttp on Android, Js on web). */
     lateinit var httpEngine: HttpClientEngineFactory<HttpClientEngineConfig>
 
+    /** Where HA requests go and how they're authenticated (the web app uses a gateway). */
+    var haEndpoint: IHaEndpoint = DirectHaEndpoint
+
     /**
      * Permission results map - tracks all requested permissions and their grant status.
      * Key: platform-independent Permission enum

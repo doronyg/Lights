@@ -62,7 +62,7 @@ fun MainScreen(
 
     // initialize root once
     LaunchedEffect(Unit) {
-        navigator.setRoot(if (Settings.isConfigured) Screen.Tab(BottomTab.Main) else Screen.Onboarding)
+        navigator.setRoot(if (Settings.hasHaConnection) Screen.Tab(BottomTab.Main) else Screen.Onboarding)
     }
 
     val current = navigator.current ?: Screen.Tab(BottomTab.Main)

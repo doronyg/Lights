@@ -8,3 +8,18 @@ plugins {
     alias(libs.plugins.compose.compiler) apply false
     alias(libs.plugins.compose.multiplatform) apply false
 }
+
+// Kotlin/Wasm tooling (Node.js, Yarn, Binaryen) is resolved from the repositories declared in
+// settings.gradle.kts. A null downloadBaseUrl stops the Kotlin plugin from adding its own
+// repositories, which FAIL_ON_PROJECT_REPOS forbids.
+allprojects {
+    fun Project.useSettingsRepositoriesForWasmTools() =
+        extensions.extensionsSchema.elements.forEach { schema ->
+            (extensions.findByName(schema.name) as? org.jetbrains.kotlin.gradle.targets.js.EnvSpec<*>)
+                ?.downloadBaseUrl?.set(null as String?)
+        }
+    plugins.withType<org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsPlugin> { useSettingsRepositoriesForWasmTools() }
+    plugins.withType<org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootPlugin> { useSettingsRepositoriesForWasmTools() }
+    plugins.withType<org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnPlugin> { useSettingsRepositoriesForWasmTools() }
+    plugins.withType<org.jetbrains.kotlin.gradle.targets.wasm.binaryen.BinaryenPlugin> { useSettingsRepositoriesForWasmTools() }
+}

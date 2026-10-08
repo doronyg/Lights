@@ -90,14 +90,17 @@ private fun LazyListScope.settingsItems(onEvent: (UiEvent) -> Unit) {
         )
     }
 
-    item {
-        SettingsActionCard(
-            title = "Show Setup QR",
-            description = "Scan from another device to copy your setup",
-            onClick = {
-                onEvent(UiEvent.NavigateTo(Screen.SetupQr))
-            }
-        )
+    // The setup QR contains the HA URL and token: not available when the app never sees them
+    if (!PlatformBridge.haEndpoint.credentialsManagedExternally) {
+        item {
+            SettingsActionCard(
+                title = "Show Setup QR",
+                description = "Scan from another device to copy your setup",
+                onClick = {
+                    onEvent(UiEvent.NavigateTo(Screen.SetupQr))
+                }
+            )
+        }
     }
 
     item {

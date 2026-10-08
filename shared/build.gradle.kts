@@ -34,6 +34,22 @@ kotlin {
         compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
     }
 
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs { // Web (see :webApp)
+        browser()
+    }
+
+    // skikoMain: code for the Skia-rendered, mouse-driven targets (desktop + web), e.g. scrollbars
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
+    applyDefaultHierarchyTemplate {
+        common {
+            group("skiko") {
+                withJvm()
+                withWasmJs()
+            }
+        }
+    }
+
     sourceSets {
         commonMain.dependencies {
             // `api`: these types appear in the module's public API (StateFlow, HttpClient, Json, ...)
@@ -61,11 +77,3 @@ kotlin {
         }
     }
 }
-
-
-
-
-
-
-
-

@@ -1,6 +1,5 @@
 package com.doronyg.mylightscontroller.utils
 
-import com.doronyg.mylightscontroller.Config
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -8,11 +7,9 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
@@ -40,16 +37,18 @@ object NetworkUtils {
         }
     }
 
-    // Add common Home Assistant headers to any request
+    // Authenticate a request for HA (Bearer token natively; nothing on web, the gateway adds it)
     fun HttpRequestBuilder.withHaHeaders() {
-        header(HttpHeaders.Authorization, "Bearer ${Config.homeAssistantToken}")
+        PlatformBridge.haEndpoint.authorize(this)
     }
+
+    /** Full URL of an HA REST path, e.g. haUrl("states") -> "<base>/api/states". */
+    fun haUrl(path: String): String = "${PlatformBridge.haEndpoint.baseUrl}/api/$path"
 
     // Suspend GET request - returns result directly with try-catch
     suspend inline fun <reified T> haGet(endpoint: String): T {
         return try {
-            val url = "${Config.homeAssistantUrl}/api/$endpoint"
-            httpClient.get(url) {
+            httpClient.get(haUrl(endpoint)) {
                 withHaHeaders()
             }.body()
         } catch (e: Exception) {
@@ -81,7 +80,7 @@ object NetworkUtils {
         body: T
     ) {
         try {
-            httpClient.post("${Config.homeAssistantUrl}/api/services/$endpoint") {
+            httpClient.post(haUrl("services/$endpoint")) {
                 withHaHeaders()
                 contentType(ContentType.Application.Json)
                 setBody(body)

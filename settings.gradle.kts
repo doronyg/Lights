@@ -22,10 +22,31 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
+        // Kotlin/Wasm tooling, downloaded once by Gradle (see "downloadBaseUrl" in build.gradle.kts)
+        ivy("https://nodejs.org/dist") {
+            name = "Node.js distributions"
+            patternLayout { artifact("v[revision]/[artifact](-v[revision]-[classifier]).[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("org.nodejs", "node") }
+        }
+        ivy("https://github.com/yarnpkg/yarn/releases/download") {
+            name = "Yarn distributions"
+            patternLayout { artifact("v[revision]/[artifact](-v[revision]).[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("com.yarnpkg", "yarn") }
+        }
+        ivy("https://github.com/WebAssembly/binaryen/releases/download") {
+            name = "Binaryen distributions"
+            patternLayout { artifact("version_[revision]/binaryen-version_[revision]-[classifier].[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("com.github.webassembly", "binaryen") }
+        }
     }
 }
 
-rootProject.name = "My Lights Controller"
+// No spaces: the Kotlin/Wasm build derives npm package names from it
+rootProject.name = "MyLightsController"
 
 /**
  * Android modules need the Android SDK. Machines without it (e.g. a Windows box used only
@@ -45,3 +66,4 @@ if (!androidEnabled) logger.lifecycle("Android SDK not found: building without :
 if (androidEnabled) include(":app")
 include(":shared")
 include(":desktopApp")
+include(":webApp")

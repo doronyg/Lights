@@ -57,6 +57,22 @@ optional: without it, `:app` and the Android target are skipped automatically
 - Environment variables `HA_URL`, `HA_TOKEN`, `PORCUPINE_API_KEY` provide defaults; `MYLIGHTS_DEBUG=true` enables debug options.
 - Not available on desktop yet: voice control, QR scanning (use manual setup), translation.
 
+## Web app (Kotlin/Wasm)
+
+The `:webApp` module runs the shared UI in the browser (Compose Multiplatform, Kotlin/Wasm).
+It never sees the HA token: requests go to `/api/...` on the same origin, and a gateway
+(reverse proxy) in front of the app forwards them to Home Assistant, adding the token.
+
+| Task | Command |
+|---|---|
+| Dev server (proxies to HA) | `HA_URL=http://homeassistant.local:8123 HA_TOKEN=<token> ./gradlew :webApp:wasmJsBrowserDevelopmentRun` |
+| Demo (no HA) | run the dev server without `HA_URL`, open `http://localhost:8080/?demo` |
+| Release build | `./gradlew :webApp:wasmJsBrowserDistribution` → `webApp/build/dist/wasmJs/productionExecutable/` |
+
+- In production, serve the release output and proxy `/api/` to HA with an `Authorization: Bearer <token>` header (e.g. nginx `proxy_set_header`).
+- Settings are kept in the browser's `localStorage`; add `?debug` to the URL for debug options.
+- Not available on the web yet: voice control, QR scanning, setup QR, translation, browser back button.
+
 ## Notes
 
 - Configuration secrets are supplied locally and are not committed to source control.

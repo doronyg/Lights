@@ -170,7 +170,6 @@ class ScrollbarRenderTest {
     fun realMainScreenScrollbarStaysAboveBottomBar() {
         DesktopPlatformInitializer.initialize()
         PlatformBridge.preferences = InMemoryPreferences() // don't touch ~/.mylightscontroller
-        com.doronyg.mylightscontroller.Settings.isConfigured // init order: Settings before Config (as in the app)
         kotlinx.coroutines.runBlocking { com.doronyg.mylightscontroller.onboarding.applyDemoConfig() }
 
         val width = 420
@@ -256,19 +255,3 @@ class ScrollbarRenderTest {
 
     private fun hex(c: Int) = "%08X".format(c)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
