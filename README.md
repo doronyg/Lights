@@ -36,46 +36,17 @@ Built with Kotlin and Jetpack Compose.
 - Home Assistant REST API
 - Material 3 UI
 
-## Desktop app ("Lights")
+## Platforms
 
-The `:desktopApp` module runs the shared UI and logic on macOS, Windows and Linux (Compose Desktop).
-
-Requirements: JDK 17+ to run Gradle (Android Studio's bundled JDK is fine). The Android SDK is
-optional: without it, `:app` and the Android target are skipped automatically
-(force with `-Plights.android=false`).
-
-| Task | macOS / Linux | Windows |
+| Platform | Module | Guide |
 |---|---|---|
-| Run | `./gradlew :desktopApp:run` | `gradlew.bat :desktopApp:run` |
-| Tests | `./gradlew :desktopApp:test` | `gradlew.bat :desktopApp:test` |
-| Installer | `./gradlew :desktopApp:packageDmg` | `gradlew.bat :desktopApp:packageMsi` (or `packageExe`) |
+| Android | `:app` | [docs/android.md](docs/android.md) |
+| Desktop: macOS, Windows ("Lights") | `:desktopApp` | [docs/desktop.md](docs/desktop.md) |
+| Web (Kotlin/Wasm), development | `:webApp` | [docs/web.md](docs/web.md) |
+| Web on a NAS (Docker gateway) | `:webApp` + `:gateway` | [docs/nas.md](docs/nas.md) |
 
-- Installers can only be built on their own OS (jpackage can't cross-compile).
-- Packaging tasks use a full JDK 21 (with `jpackage`), which Gradle downloads once if needed.
-- Output: `desktopApp/build/compose/binaries/main/<format>/`.
-- Settings (including the HA token): `~/.mylightscontroller` on macOS/Linux, `%APPDATA%\Lights` on Windows.
-- Environment variables `HA_URL`, `HA_TOKEN`, `PORCUPINE_API_KEY` provide defaults; `MYLIGHTS_DEBUG=true` enables debug options.
-- Not available on desktop yet: voice control, QR scanning (use manual setup), translation.
-
-## Web app (Kotlin/Wasm)
-
-The `:webApp` module runs the shared UI in the browser (Compose Multiplatform, Kotlin/Wasm).
-It never sees the HA token: requests go to `/api/...` on the same origin, and a gateway
-(reverse proxy) in front of the app forwards them to Home Assistant, adding the token.
-
-| Task | Command |
-|---|---|
-| Dev server (proxies to HA) | `HA_URL=http://homeassistant.local:8123 HA_TOKEN=<token> ./gradlew :webApp:wasmJsBrowserDevelopmentRun` |
-| Demo (no HA) | run the dev server without `HA_URL`, open `http://localhost:8080/?demo` |
-| Release build | `./gradlew :webApp:wasmJsBrowserDistribution` → `webApp/build/dist/wasmJs/productionExecutable/` |
-| Gateway, locally | `./gradlew :gateway:run` → `http://localhost:8321` (first-run setup asks for the HA URL + token) |
-| NAS bundle | `./gradlew :gateway:bundle` → `gateway/build/bundle/lights/` + `lights.zip`, see [gateway/README.md](gateway/README.md) |
-
-- Production: the `:gateway` server (Ktor, in Docker on the NAS) serves the web app, forwards only
-  the HA calls the app needs and adds the token. The URL + token are entered once on the
-  first-run setup screen and stored on the NAS only.
-- Settings are kept in the browser's `localStorage`; add `?debug` to the URL for debug options.
-- Not available on the web yet: voice control, QR scanning, setup QR, translation, browser back button.
+UI and logic are shared by all platforms in `:shared` (Kotlin Multiplatform + Compose Multiplatform).
+Prerequisites, and how each app gets the Home Assistant secrets: [docs/README.md](docs/README.md).
 
 ## Notes
 
