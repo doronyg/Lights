@@ -28,8 +28,13 @@
 | Web (NAS) | First-run setup page, once, by the first user | On the NAS (`data/ha.properties`, mode 600); never in the browser |
 | Web (dev) | `HA_URL` / `HA_TOKEN` environment variables | Your shell only |
 
-Create the token in Home Assistant: **your profile → Security → Long-lived access tokens → Create
-token**. It's shown only once. Secrets are never committed to the repository.
+**To create a Home Assistant token:**
+
+1. Open Home Assistant and click your profile/user icon (bottom left).
+2. Scroll to **Long-Lived Access Tokens**.
+3. Click **Create Token**, give it a name (e.g. "Lights"), and click **Create**.
+4. Copy the token immediately and save it somewhere safe (it's shown only once).
+5. Secrets are never committed to the repository.
 
 ## Project modules
 
