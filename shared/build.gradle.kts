@@ -39,6 +39,15 @@ kotlin {
         browser()
     }
 
+    // iOS (see iosApp/): device + Apple-silicon simulator. The Xcode project links the
+    // static "Shared" framework, built by the embedAndSignAppleFrameworkForXcode task.
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
+        target.binaries.framework {
+            baseName = "Shared"
+            isStatic = true
+        }
+    }
+
     // skikoMain: code for the Skia-rendered, mouse-driven targets (desktop + web), e.g. scrollbars
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
     applyDefaultHierarchyTemplate {
@@ -68,6 +77,10 @@ kotlin {
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+        }
+
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin) // NSURLSession-based HTTP engine
         }
 
         if (androidEnabled) {

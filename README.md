@@ -41,6 +41,7 @@ Built with Kotlin and Jetpack Compose.
 | Platform | Module | Guide |
 |---|---|---|
 | Android | `:app` | [docs/android.md](docs/android.md) |
+| iOS (iPhone, iPad) | `iosApp/` + `:shared` | [docs/ios.md](docs/ios.md) |
 | Desktop: macOS, Windows ("Lights") | `:desktopApp` | [docs/desktop.md](docs/desktop.md) |
 | Web (Kotlin/Wasm), development | `:webApp` | [docs/web.md](docs/web.md) |
 | Web on a NAS (Docker gateway) | `:webApp` + `:gateway` | [docs/nas.md](docs/nas.md) |

@@ -37,6 +37,7 @@ token**. It's shown only once. Secrets are never committed to the repository.
 |---|---|
 | `:shared` | UI and logic shared by all apps (Kotlin Multiplatform + Compose Multiplatform) |
 | `:app` | Android app |
+| `iosApp/` | iOS app (Xcode project hosting the `Shared` framework from `:shared`) |
 | `:desktopApp` | Desktop app (Compose Desktop) |
 | `:webApp` | Web app (Kotlin/Wasm) |
 | `:gateway` | Server for the web app on a NAS (Ktor) |

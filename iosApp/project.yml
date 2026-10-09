@@ -1,0 +1,76 @@
+# XcodeGen spec for the iOS app. The .xcodeproj is generated from this file:
+#
+#   cd iosApp && xcodegen      (brew install xcodegen)
+#
+# The app is a thin SwiftUI host; the UI and logic are the Kotlin "Shared" framework, which a
+# pre-build script compiles with Gradle (:shared:embedAndSignAppleFrameworkForXcode).
+name: iosApp
+options:
+  bundleIdPrefix: com.doronyg.mylightscontroller
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+
+targets:
+  Lights:
+    type: application
+    platform: iOS
+    sources:
+      - path: iosApp
+      # Demo devices, shared with Android/web (read by IosMockDataProvider)
+      - path: ../app/src/main/assets/ha_lights_demo.json
+        buildPhase: resources
+    info:
+      path: iosApp/Info.plist
+      properties:
+        CFBundleDisplayName: Lights
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        UILaunchScreen: {}
+        UIApplicationSupportsIndirectInputEvents: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # Compose Multiplatform: allow 120 Hz on ProMotion iPhones (required by Compose)
+        CADisableMinimumFrameDurationOnPhone: true
+        # Home Assistant on the LAN is often plain http (e.g. http://192.168.1.10:8123)
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        NSLocalNetworkUsageDescription: Lights connects to Home Assistant on your home network.
+    settings:
+      base:
+        PRODUCT_NAME: Lights
+        PRODUCT_BUNDLE_IDENTIFIER: com.doronyg.mylightscontroller.ios
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_STYLE: Automatic
+        # Set your team in Xcode (Signing & Capabilities) to run on a device
+        DEVELOPMENT_TEAM: ""
+        # The Kotlin framework, built by the script below
+        FRAMEWORK_SEARCH_PATHS: "$(inherited) $(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        OTHER_LDFLAGS: "$(inherited) -framework Shared"
+        # The Gradle script reads/writes outside the sandbox
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+    preBuildScripts:
+      - name: Compile Kotlin framework
+        basedOnDependencyAnalysis: false
+        shell: /bin/sh
+        script: |
+          # Xcode doesn't inherit your shell's JAVA_HOME; fall back to Android Studio's JDK
+          if [ -z "$JAVA_HOME" ] && [ -d "/Applications/Android Studio.app/Contents/jbr/Contents/Home" ]; then
+            export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+          fi
+          cd "$SRCROOT/.."
+          ./gradlew :shared:embedAndSignAppleFrameworkForXcode
