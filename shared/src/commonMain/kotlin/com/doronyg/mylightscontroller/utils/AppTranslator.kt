@@ -1,128 +1,39 @@
 package com.doronyg.mylightscontroller.utils
 
 import com.doronyg.mylightscontroller.platform.common.PlatformBridge
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 /**
- * Multiplatform translator facade.
- * Platform-specific implementation details are delegated via PlatformBridge.
- *
- * This object provides:
- * - Multiplatform StateFlow for reactive ready state
- * - Shared caching logic
- * - Suspend translate/preload functions
+ * Multiplatform translator facade over [TranslationService].
+ * Platform-specific details (ML Kit, cache and dictionary storage) come via PlatformBridge.
  */
 object AppTranslator {
 
-    private val initMutex = Mutex()
+    private var current: TranslationService? = null
 
-    private val targetLanguage: String by lazy {
-        PlatformBridge.translator.deviceLanguage()
-    }
-
-    private val isEnglish: Boolean by lazy {
-        targetLanguage == "en"
-    }
-
-    private val _ready = MutableStateFlow(false)
-    val ready: StateFlow<Boolean> = _ready
-
-    private val memoryCache = mutableMapOf<String, String>()
-
-
-    suspend fun initialize() {
-        if (isEnglish || _ready.value) {
-            _ready.value = true
-            return
+    /** The service for the device's current language; rebuilt if the language changed since last use. */
+    private val service: TranslationService
+        get() {
+            val language = PlatformBridge.translator.deviceLanguage()
+            current?.takeIf { it.targetLanguage == language }?.let { return it }
+            current?.close()
+            return TranslationService(PlatformBridge.translator, language).also { current = it }
         }
 
-        initMutex.withLock {
-            if (_ready.value) {
-                return
-            }
+    val ready: StateFlow<Boolean> get() = service.ready
 
-            PlatformBridge.translator.initializeTranslator(targetLanguage)
-            _ready.value = true
-        }
-    }
+    suspend fun initialize() = service.initialize()
 
-    private suspend fun awaitReady() {
-        if (_ready.value) return
-
-        _ready
-            .filter { it }
-            .first()
-    }
-
-    suspend fun translate(text: String): String {
-        if (isEnglish) return text
-
-        awaitReady()
-
-        val cached = getFromCache(text)
-        if (cached != null) return cached
-
-        val result = PlatformBridge.translator.translateText(text)
-        saveToCache(text, result)
-        return result
-    }
+    suspend fun translate(text: String): String = service.translate(text)
 
     /**
-     * Returns a translation from the in-memory cache if available.
-     *
-     * This function is fully synchronous and does not perform any translation calls.
-     *
-     * ⚠️ Limitation:
-     * If a translation was not preloaded via AppTranslator.preload(...),
-     * this will fall back to returning the original text.
-     *
-     * Intended usage:
-     * - UI rendering (Compose)
-     * - Static labels (tabs, navigation, settings)
-     *
-     * Requirements:
-     * - AppTranslator.initialize() must be called first
-     * - AppTranslator.preload(...) should be used to populate cache
-     *
+     * Returns a translation from the dictionary or in-memory cache if available, else the original text.
+     * Fully synchronous; requires initialize() and (for ML Kit results) preload(...) first.
      * For guaranteed translation, use the suspend translate() function.
      */
-    fun cachedTranslation(text: String): String {
-        if (isEnglish) return text
+    fun cachedTranslation(text: String): String = service.cachedTranslation(text)
 
-        return memoryCache[text] ?: text
-    }
+    suspend fun preload(texts: List<String>) = service.preload(texts)
 
-    suspend fun preload(texts: List<String>) {
-        if (isEnglish) return
-
-        texts.forEach { text ->
-            val translated = PlatformBridge.translator.translateText(text)
-            memoryCache[text] = translated
-        }
-    }
-
-    private fun getFromCache(text: String): String? {
-        val cached = memoryCache[text]
-        if (cached != null) return cached
-
-        // Also check platform-specific storage
-        return PlatformBridge.translator.getFromCache(text)?.also {
-            memoryCache[text] = it
-        }
-    }
-
-    private fun saveToCache(original: String, translated: String) {
-        memoryCache[original] = translated
-        PlatformBridge.translator.saveToCache(original, translated)
-    }
-
-    fun close() {
-        PlatformBridge.translator.close()
-        _ready.value = false
-    }
+    fun close() = service.close()
 }

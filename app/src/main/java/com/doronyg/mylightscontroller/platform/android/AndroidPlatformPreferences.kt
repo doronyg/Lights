@@ -16,25 +16,15 @@ import kotlin.reflect.KProperty
 object AndroidPlatformPreferences : IPlatformPreferences {
 
     private const val APP_PREF_NAME = "app_settings"
-    private const val TRANSLATION_PREF_NAME = "translations"
 
     private val appPrefs: SharedPreferences?
         get() = AndroidUtils.appContext?.getSharedPreferences(APP_PREF_NAME, android.content.Context.MODE_PRIVATE)
-
-    private val translationPrefs: SharedPreferences?
-        get() = AndroidUtils.appContext?.getSharedPreferences(TRANSLATION_PREF_NAME, android.content.Context.MODE_PRIVATE)
 
     /**
      * Get SharedPreferences for app settings.
      * Used internally by preference delegates.
      */
     internal fun getAppPreferences(): SharedPreferences? = appPrefs
-
-    /**
-     * Get SharedPreferences for translations.
-     * Can be used by other platform-specific components.
-     */
-    internal fun getTranslationPreferences(): SharedPreferences? = translationPrefs
 
     override fun booleanPref(key: String, default: Boolean) =
         object : ReadWriteProperty<Any, Boolean> {

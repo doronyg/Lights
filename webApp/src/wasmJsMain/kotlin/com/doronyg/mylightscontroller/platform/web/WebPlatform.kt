@@ -144,8 +144,6 @@ object WebPlatformTranslator : IPlatformTranslator {
     override fun deviceLanguage() = "en"
     override suspend fun initializeTranslator(language: String) = Unit
     override suspend fun translateText(text: String) = text
-    override fun getFromCache(text: String): String? = null
-    override fun saveToCache(original: String, translated: String) = Unit
     override fun close() = Unit
 }
 
